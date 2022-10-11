@@ -1,0 +1,24 @@
+{
+  "name": "igniterlabs/ti-ext-shipday",
+  "type": "tastyigniter-extension",
+  "description": "Support local deliveries for your TastyIgniter orders with Shipday.",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Igniter Labs Team",
+      "email": "hello@igniterlabs.co.uk"
+    }
+  ],
+  "extra": {
+    "tastyigniter-extension": {
+      "code": "igniterlabs.shipday",
+      "name": "Local Delivery for TastyIgniter using Shipday",
+      "icon": {
+        "image": "icon.svg",
+        "backgroundColor": "transparent",
+        "color": "#FFFFFF"
+      },
+      "homepage": "https://tastyigniter.com/marketplace/item/igniterlabs-shipday"
+    }
+  }
+}
