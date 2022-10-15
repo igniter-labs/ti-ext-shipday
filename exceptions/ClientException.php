@@ -1,6 +1,6 @@
 <?php
 
-namespace IgniterLabs\DoorDashDrive\Exceptions;
+namespace IgniterLabs\Shipday\Exceptions;
 
 class ClientException extends \Exception
 {
@@ -10,21 +10,9 @@ class ClientException extends \Exception
     {
         $this->response = $response;
 
-        $this->message = '[DoorDash Drive]: ';
+        $this->message = '[Shipday]: ';
 
-        if (array_get($response, 'code') === 'invalid_delivery_parameters') {
-            $this->message .= lang(array_get([
-                'distance_too_long' => 'igniterlabs.doordashdrive::default.alert_distance_too_long',
-                'delivery_address_not_in_coverage' => 'igniterlabs.doordashdrive::default.alert_delivery_address_not_in_coverage',
-                'outside_of_delivery_time' => 'igniterlabs.doordashdrive::default.alert_outside_of_delivery_time',
-            ], array_get($response, 'reason', '')));
-        }
-        elseif ($errors = array_get($response, 'field_errors')) {
-            $this->message .= collect($errors)->pluck('error')->implode(', ');
-        }
-        else {
-            $this->message .= array_get($response, 'message') ?: 'An error occurred while requesting a delivery fee';
-        }
+        $this->message .= array_get($response, 'errorMessage') ?: 'An error occurred while communicating with shipday';
     }
 
     public function isValidationError()

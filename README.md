@@ -10,3 +10,9 @@ Shipday has a direct integration with TastyIgniter. Any delivery order a custome
 will instantly be forwarded to Shipday for dispatch and delivery tracking.
 
 ### Configuration
+
+- Go to **System > Settings > Shipday Delivery Settings** to enter your API Key (follow instructions on the page)
+- For On-Demand Delivery using 3rd party providers, disable the default `delivery` Cart Condition and enable
+  the `shipday` Cart Condition under **System > Settings > Cart Settings**
+- Enable **Reject Orders Outside Delivery Area** under **System > Settings > Sales**. This will require customers to
+  enter their delivery address before placing an order.

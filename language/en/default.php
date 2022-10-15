@@ -14,12 +14,15 @@ return [
     'label_assigned_status' => 'Delivery Assigned Status',
     'label_delivered_status' => 'Delivery Completed Status',
     'label_canceled_status' => 'Delivery Canceled Status',
+    'label_delivery_staff_group' => 'Delivery Staff Group',
 
     'help_settings' => 'Configure Shipday settings',
     'help_permission' => 'Ability to manage Shipday settings',
     'help_assigned_status' => 'When an order is updated to the chosen status, send the order to shipday for delivery.',
     'help_delivered_status' => 'Select the order status to set when an order is delivered',
     'help_canceled_status' => 'Select the order status to set when a delivery is canceled',
+    'help_delivery_staff_group' => 'Select the group of the staff with delivery capabilities. A corresponding carrier account will be created on Shipday.',
 
     'alert_distance_too_long' => 'Your delivery address is too far from the restaurant. Please choose another address.',
+    'alert_delivery_address_changed' => 'Your delivery address has been changed. Please review the recalculated delivery fee.',
 ];

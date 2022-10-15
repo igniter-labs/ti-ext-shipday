@@ -2,6 +2,11 @@
 
 namespace IgniterLabs\Shipday;
 
+use Igniter\Cart\Models\Orders_model;
+use IgniterLabs\Shipday\Actions\ManagesShipdayCarrier;
+use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
+use IgniterLabs\Shipday\Models\Settings;
+use Illuminate\Support\Facades\Event;
 use System\Classes\BaseExtension;
 
 /**
@@ -9,22 +14,29 @@ use System\Classes\BaseExtension;
  */
 class Extension extends BaseExtension
 {
-    /**
-     * Register method, called when the extension is first registered.
-     *
-     * @return void
-     */
-    public function register()
-    {
-    }
-
-    /**
-     * Boot method, called right before the request route.
-     *
-     * @return void
-     */
     public function boot()
     {
+        \Admin\Models\Orders_model::extend(function ($model) {
+            $model->implement[] = ManagesShipdayDelivery::class;
+        });
+
+        \Admin\Models\Staffs_model::extend(function ($model) {
+            $model->implement[] = ManagesShipdayCarrier::class;
+        });
+
+        Event::listen('admin.order.paymentProcessed', function ($order) {
+            if ($order->isDeliveryType()) $order->createOrGetShipdayDelivery();
+        });
+
+        Event::listen('admin.assignable.assigned', function ($model, $assignableLog) {
+            if ($model instanceof Orders_model
+                && Settings::canAssignGroup($assignableLog->assignee_group_id)
+                && $assignableLog->assignee
+                && $model->isDeliveryType()
+            ) {
+                $model->assignShipdayDeliveryToCarrier($assignableLog->assignee);
+            }
+        });
     }
 
     /**

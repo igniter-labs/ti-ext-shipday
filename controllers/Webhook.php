@@ -2,8 +2,8 @@
 
 namespace IgniterLabs\Shipday\Controllers;
 
-use IgniterLabs\DoorDashDrive\Models\Delivery;
-use IgniterLabs\DoorDashDrive\Models\Settings;
+use IgniterLabs\Shipday\Models\Delivery;
+use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
@@ -12,17 +12,13 @@ class Webhook extends Controller
     public function __invoke(Request $request)
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($request->bearerToken())) {
-            if ($this->shouldHandleEvent($request->input('event_name'))) {
-                if ($delivery = $this->getDeliveryByUuid($request->input('external_delivery_id'))) {
-                    $delivery->fillFromQuote($request->input())->save();
+            if ($this->shouldHandleEvent($request->input('event'))) {
+                if ($delivery = $this->getDeliveryByShipdayId($request->input('order.id'))) {
+                    $delivery->status = $request->input('order_status');
+                    $delivery->tracking_url = $request->input('order.tracking_url');
+                    $delivery->response_data = $request->input();
 
-                    if ($delivery->status == 'delivered') {
-                        $delivery->markAsDelivered();
-                    }
-
-                    if ($delivery->status == 'cancelled') {
-                        $delivery->markAsCanceled();
-                    }
+                    $delivery->save();
                 }
             }
         }
@@ -33,16 +29,11 @@ class Webhook extends Controller
     protected function shouldHandleEvent($eventName)
     {
         return in_array($eventName, [
-            'DASHER_CONFIRMED',
-            'DASHER_CONFIRMED_PICKUP_ARRIVAL',
-            'DASHER_PICKED_UP',
-            'DASHER_CONFIRMED_DROPOFF_ARRIVAL',
-            'DASHER_DROPPED_OFF',
-            'DELIVERY_CANCELLED',
-
-            'DELIVERY_RETURN_INITIALIZED',
-            'DASHER_CONFIRMED_RETURN_ARRIVAL',
-            'DELIVERY_RETURNED',
+            'ORDER_ASSIGNED',
+            'ORDER_ACCEPTED_AND_STARTED',
+            'ORDER_ONTHEWAY',
+            'ORDER_COMPLETED',
+            'ORDER_FAILED',
         ]);
     }
 
@@ -50,8 +41,8 @@ class Webhook extends Controller
      * @param string $uuid
      * @return \IgniterLabs\DoorDashDrive\Models\Delivery
      */
-    protected function getDeliveryByUuid($uuid)
+    protected function getDeliveryByShipdayId($shipdayId)
     {
-        return Delivery::whereUuid($uuid)->whereNotNull('order_id')->first();
+        return Delivery::where('shipday_id', $shipdayId)->first();
     }
 }

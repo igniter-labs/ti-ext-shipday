@@ -12,7 +12,7 @@
   "extra": {
     "tastyigniter-extension": {
       "code": "igniterlabs.shipday",
-      "name": "Local Delivery for TastyIgniter using Shipday",
+      "name": "Shipday: Local Delivery for TastyIgniter",
       "icon": {
         "image": "icon.svg",
         "backgroundColor": "transparent",

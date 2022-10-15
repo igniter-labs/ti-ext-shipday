@@ -55,9 +55,9 @@ class Settings extends Model
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
     }
 
-    public static function canAssignStatus($statusId)
+    public static function canAssignGroup($groupId)
     {
-        return (int)self::get('assigned_status_id') === $statusId;
+        return (int)self::get('delivery_staff_group') === $groupId;
     }
 
     public static function getApiKey()

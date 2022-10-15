@@ -27,6 +27,13 @@ return [
                 'label' => 'lang:igniterlabs.shipday::default.label_api_key',
                 'type' => 'text',
             ],
+            'delivery_staff_group' => [
+                'label' => 'lang:igniterlabs.shipday::default.label_delivery_staff_group',
+                'type' => 'select',
+                'span' => 'left',
+                'options' => [\Admin\Models\Staff_groups_model::class, 'getDropdownOptions'],
+                'comment' => 'lang:igniterlabs.shipday::default.help_delivery_staff_group',
+            ],
             'assigned_status_id' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_assigned_status',
                 'type' => 'select',

@@ -13,6 +13,7 @@ class Delivery extends Model
     protected $guarded = [];
 
     protected $casts = [
+        'request_data' => 'array',
         'response_data' => 'array',
     ];
 
