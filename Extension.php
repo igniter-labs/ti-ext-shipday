@@ -2,7 +2,6 @@
 
 namespace IgniterLabs\Shipday;
 
-use Igniter\Cart\Models\Orders_model;
 use IgniterLabs\Shipday\Actions\ManagesShipdayCarrier;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
 use IgniterLabs\Shipday\Models\Settings;
@@ -20,22 +19,9 @@ class Extension extends BaseExtension
             $model->implement[] = ManagesShipdayDelivery::class;
         });
 
-        \Admin\Models\Staffs_model::extend(function ($model) {
-            $model->implement[] = ManagesShipdayCarrier::class;
-        });
-
         Event::listen('admin.order.paymentProcessed', function ($order) {
-            if ($order->isDeliveryType()) $order->createOrGetShipdayDelivery();
-        });
-
-        Event::listen('admin.assignable.assigned', function ($model, $assignableLog) {
-            if ($model instanceof Orders_model
-                && Settings::canAssignGroup($assignableLog->assignee_group_id)
-                && $assignableLog->assignee
-                && $model->isDeliveryType()
-            ) {
-                $model->assignShipdayDeliveryToCarrier($assignableLog->assignee);
-            }
+            if (!Settings::supportsOnDemandDelivery() && $order->isDeliveryType())
+                $order->createOrGetShipdayDelivery();
         });
     }
 
@@ -64,17 +50,6 @@ class Extension extends BaseExtension
                 'icon' => 'fa fa-gear',
                 'model' => \IgniterLabs\Shipday\Models\Settings::class,
                 'permissions' => ['IgniterLabs.Shipday.ManageSettings'],
-            ],
-        ];
-    }
-
-    public function registerCartConditions()
-    {
-        return [
-            \IgniterLabs\Shipday\CartConditions\Shipday::class => [
-                'name' => 'shipday',
-                'label' => 'lang:igniterlabs.shipday::default.label_cart_condition_title',
-                'description' => 'lang:igniterlabs.shipday::default.label_cart_condition_description',
             ],
         ];
     }

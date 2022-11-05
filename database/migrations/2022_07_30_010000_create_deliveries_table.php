@@ -23,21 +23,28 @@ class CreateDeliveriesTable extends Migration
             $table->timestamps();
         });
 
-        Schema::table('orders', function (Blueprint $table) {
-            $table->bigInteger('shipday_id')->nullable();
-        });
+        if (!Schema::hasColumn('orders', 'shipday_id')) {
+            Schema::table('orders', function (Blueprint $table) {
+                $table->bigInteger('shipday_id')->nullable();
+            });
+        }
 
-        Schema::table('staffs', function (Blueprint $table) {
-            $table->string('telephone')->nullable();
-            $table->bigInteger('shipday_id')->nullable();
-        });
+        if (!Schema::hasColumn('staffs', 'shipday_id')) {
+            Schema::table('staffs', function (Blueprint $table) {
+                $table->string('telephone')->nullable();
+                $table->bigInteger('shipday_id')->nullable();
+            });
+        }
     }
 
     public function down()
     {
         Schema::dropIfExists('igniterlabs_shipday_deliveries');
 
-        Schema::dropColumns('orders', ['shipday_id']);
-        Schema::dropColumns('staffs', ['telephone', 'shipday_id']);
+        if (Schema::hasColumn('orders', 'shipday_id'))
+            Schema::dropColumns('orders', ['shipday_id']);
+
+        if (Schema::hasColumn('staffs', 'shipday_id'))
+            Schema::dropColumns('staffs', ['telephone', 'shipday_id']);
     }
 }

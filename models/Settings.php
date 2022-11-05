@@ -55,24 +55,34 @@ class Settings extends Model
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
     }
 
-    public static function canAssignGroup($groupId)
-    {
-        return (int)self::get('delivery_staff_group') === $groupId;
-    }
-
     public static function getApiKey()
     {
         return self::get('api_key');
     }
 
+    public static function supportsOnDemandDelivery()
+    {
+        return false;
+    }
+
     public static function getCompletedStatusId()
     {
-        return self::getCredentials('delivered_status_id');
+        return self::get('delivered_status_id');
     }
 
     public static function getCanceledStatusId()
     {
-        return self::getCredentials('canceled_status_id');
+        return self::get('canceled_status_id');
+    }
+
+    public static function getOrderStatusIdByShipdayStatus($status)
+    {
+        $statusMap = [
+            'ALREADY_DELIVERED' => self::getCompletedStatusId(),
+            'FAILED_DELIVERY' => self::getCanceledStatusId(),
+        ];
+
+        return $statusMap[$status] ?? null;
     }
 
     public function getWebhookTokenAttribute($value)
