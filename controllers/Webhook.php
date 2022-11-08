@@ -2,7 +2,6 @@
 
 namespace IgniterLabs\Shipday\Controllers;
 
-use Admin\Models\Orders_model;
 use IgniterLabs\Shipday\Models\Delivery;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Http\Request;
@@ -15,17 +14,7 @@ class Webhook extends Controller
         if (Settings::isConnected() && Settings::validateWebhookToken($request->bearerToken())) {
             if ($this->shouldHandleEvent($request->input('event'))) {
                 if ($delivery = $this->getDeliveryByShipdayId($request->input('order.id'))) {
-                    $delivery->status = $request->input('order_status');
-                    $delivery->tracking_url = $request->input('order.tracking_url');
-                    $delivery->response_data = $request->input();
-
-                    $delivery->save();
-                }
-
-                $order = $this->getOrderByShipdayId($request->input('order.id'));
-                $statusId = Settings::getOrderStatusIdByShipdayStatus($request->input('order_status'));
-                if ($order && $statusId) {
-                    $order->updateOrderStatus($statusId, ['notify' => false]);
+                    $delivery->updateFromWebhook($request->input());
                 }
             }
         }
@@ -51,14 +40,5 @@ class Webhook extends Controller
     protected function getDeliveryByShipdayId($shipdayId)
     {
         return Delivery::where('shipday_id', $shipdayId)->first();
-    }
-
-    /**
-     * @param string $shipdayId
-     * @return \IgniterLabs\DoorDashDrive\Models\Delivery
-     */
-    protected function getOrderByShipdayId($shipdayId)
-    {
-        return Orders_model::where('shipday_id', $shipdayId)->first();
     }
 }

@@ -3,7 +3,6 @@
 namespace IgniterLabs\Shipday\Actions;
 
 use Admin\Models\Locations_model;
-use Admin\Models\Staffs_model;
 use Exception;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Traits\ExtensionTrait;
@@ -88,6 +87,19 @@ class ManagesShipdayDelivery extends ModelAction
         return $this;
     }
 
+    public function updateShipdayDeliveryStatus()
+    {
+        $response = $this->asShipdayDelivery();
+
+        $delivery = $this->model->shipday_delivery;
+        $delivery->fillFromRemote($response)->save();
+
+        $this->model->shipday_id = $response['orderId'];
+        $this->model->save();
+
+        return $delivery;
+    }
+
     public function updateShipdayDelivery(array $params = [])
     {
         return resolve(Client::class)->editOrder(
@@ -96,14 +108,17 @@ class ManagesShipdayDelivery extends ModelAction
         );
     }
 
-    public function assignShipdayDeliveryToCarrier(Staffs_model $carrier)
+    public function markShipdayDeliveryAsReadyForPickup()
     {
-        $carrier->createOrGetShipdayCarrier();
+        if (!$this->hasShipdayDelivery())
+            return;
 
-        return resolve(Client::class)->assignOrder(
-            $this->shipdayId(),
-            $carrier->shipdayId(),
-        );
+        $delivery = $this->model->shipday_delivery;
+        if ($delivery && $delivery->isReadyForPickup()) {
+            resolve(Client::class)->readyForPickup($this->shipdayId());
+
+            return $this->updateShipdayDeliveryStatus();
+        }
     }
 
     protected function makeRequestParams(array $params = [])

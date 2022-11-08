@@ -65,6 +65,11 @@ class Settings extends Model
         return false;
     }
 
+    public static function getReadyForPickupStatusId()
+    {
+        return self::get('ready_for_pickup_status_id');
+    }
+
     public static function getCompletedStatusId()
     {
         return self::get('delivered_status_id');

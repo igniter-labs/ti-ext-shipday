@@ -23,24 +23,30 @@ class Delivery extends Model
         ],
     ];
 
-    public function fillFromQuote(array $quote)
+    public function fillFromRemote(array $response)
     {
-        $this->uuid = array_get($quote, 'external_delivery_id');
-        $this->fee = array_get($quote, 'fee');
-        $this->status = array_get($quote, 'delivery_status');
-        $this->tracking_url = array_get($quote, 'tracking_url');
-        $this->response_data = $quote;
+        $this->status = array_get($response, 'orderStatus.orderState', 'SENT');
+        $this->response_data = $response;
 
         return $this;
     }
 
-    public function markAsDelivered()
+    public function updateFromWebhook(array $response)
     {
-        return $this->order->updateOrderStatus(Settings::getCompletedStatusId());
+        $this->status = array_get($response, 'order_status', 'SENT');
+        $this->tracking_url = array_get($response, 'order.tracking_url');
+        $this->response_data = $response;
+        $this->save();
+
+        if ($this->order && ($statusId = Settings::getOrderStatusIdByShipdayStatus($this->status))) {
+            $this->order->updateOrderStatus($statusId, ['notify' => false]);
+        }
+
+        return $this;
     }
 
-    public function markAsCanceled()
+    public function isReadyForPickup()
     {
-        return $this->order->updateOrderStatus(Settings::getCanceledStatusId());
+        return in_array($this->status, ['NOT_ASSIGNED', 'NOT_ACCEPTED', 'NOT_STARTED_YET']);
     }
 }

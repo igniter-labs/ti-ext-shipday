@@ -27,6 +27,12 @@ return [
                 'label' => 'lang:igniterlabs.shipday::default.label_api_key',
                 'type' => 'text',
             ],
+            'ready_for_pickup_status_id' => [
+                'label' => 'lang:igniterlabs.shipday::default.label_ready_for_pickup_status',
+                'type' => 'select',
+                'options' => ['Admin\Models\Statuses_model', 'getDropdownOptionsForOrder'],
+                'comment' => 'lang:igniterlabs.shipday::default.help_ready_for_pickup_status',
+            ],
             'delivered_status_id' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_delivered_status',
                 'type' => 'select',

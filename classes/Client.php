@@ -35,6 +35,13 @@ class Client
         return $this->sendRequest('orders/'.$uuid, [], 'delete');
     }
 
+    public function readyForPickup($uuid)
+    {
+        return $this->sendRequest('orders/'.$uuid.'/meta', [
+            'readyToPickup' => true,
+        ], 'put');
+    }
+
     //
     //
     //

@@ -2,7 +2,7 @@
 
 namespace IgniterLabs\Shipday;
 
-use IgniterLabs\Shipday\Actions\ManagesShipdayCarrier;
+use Admin\Models\Orders_model;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Support\Facades\Event;
@@ -22,6 +22,12 @@ class Extension extends BaseExtension
         Event::listen('admin.order.paymentProcessed', function ($order) {
             if (!Settings::supportsOnDemandDelivery() && $order->isDeliveryType())
                 $order->createOrGetShipdayDelivery();
+        });
+
+        Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus) {
+            if ($object instanceof Orders_model && Settings::getReadyForPickupStatusId() === $statusId) {
+                $object->markShipdayDeliveryAsReadyForPickup();
+            }
         });
     }
 
