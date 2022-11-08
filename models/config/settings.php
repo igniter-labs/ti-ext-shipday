@@ -48,9 +48,9 @@ return [
         ],
         'rules' => [
             'api_key' => ['required', 'string'],
-            'assigned_status_id' => ['required', 'different:delivered_status_id', 'different:canceled_status_id'],
-            'delivered_status_id' => ['required', 'different:canceled_status_id', 'different:assigned_status_id'],
-            'canceled_status_id' => ['required', 'different:assigned_status_id', 'different:delivered_status_id'],
+            'ready_for_pickup_status_id' => ['required', 'different:delivered_status_id', 'different:canceled_status_id'],
+            'delivered_status_id' => ['required', 'different:canceled_status_id', 'different:ready_for_pickup_status_id'],
+            'canceled_status_id' => ['required', 'different:ready_for_pickup_status_id', 'different:delivered_status_id'],
         ],
     ],
 ];
