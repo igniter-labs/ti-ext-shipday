@@ -65,6 +65,23 @@ class Settings extends Model
         return false;
     }
 
+    public static function isMappedShipdayStatus($statusId)
+    {
+        return $statusId == self::getReadyForPickupStatusId()
+            || $statusId == self::getCompletedStatusId()
+            || $statusId == self::getCanceledStatusId();
+    }
+
+    public static function isShipdayDriverStaffGroup($groupId)
+    {
+        return (int)self::get('delivery_staff_group') === $groupId;
+    }
+
+    public static function isReadyForPickupOrderStatus($statusId)
+    {
+        return $statusId == self::getReadyForPickupStatusId();
+    }
+
     public static function getReadyForPickupStatusId()
     {
         return self::get('ready_for_pickup_status_id');
@@ -80,14 +97,13 @@ class Settings extends Model
         return self::get('canceled_status_id');
     }
 
-    public static function getOrderStatusIdByShipdayStatus($status)
+    public static function getShipdayStatusMap()
     {
-        $statusMap = [
+        return collect([
+            'SENT' => self::getReadyForPickupStatusId(),
             'ALREADY_DELIVERED' => self::getCompletedStatusId(),
             'FAILED_DELIVERY' => self::getCanceledStatusId(),
-        ];
-
-        return $statusMap[$status] ?? null;
+        ]);
     }
 
     public function getWebhookTokenAttribute($value)

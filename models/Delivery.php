@@ -38,15 +38,15 @@ class Delivery extends Model
         $this->response_data = $response;
         $this->save();
 
-        if ($this->order && ($statusId = Settings::getOrderStatusIdByShipdayStatus($this->status))) {
+        if ($this->order && ($statusId = Settings::getShipdayStatusMap()->get($this->status))) {
             $this->order->updateOrderStatus($statusId, ['notify' => false]);
         }
 
         return $this;
     }
 
-    public function isReadyForPickup()
+    public function isCancelled()
     {
-        return in_array($this->status, ['NOT_ASSIGNED', 'NOT_ACCEPTED', 'NOT_STARTED_YET']);
+        return $this->status === 'FAILED_DELIVERY';
     }
 }

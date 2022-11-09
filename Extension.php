@@ -4,6 +4,7 @@ namespace IgniterLabs\Shipday;
 
 use Admin\Models\Orders_model;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
+use IgniterLabs\Shipday\Actions\ManagesShipdayDriver;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Support\Facades\Event;
 use System\Classes\BaseExtension;
@@ -19,14 +20,40 @@ class Extension extends BaseExtension
             $model->implement[] = ManagesShipdayDelivery::class;
         });
 
+        \Admin\Models\Staffs_model::extend(function ($model) {
+            $model->implement[] = ManagesShipdayDriver::class;
+        });
+
         Event::listen('admin.order.paymentProcessed', function ($order) {
             if (!Settings::supportsOnDemandDelivery() && $order->isDeliveryType())
                 $order->createOrGetShipdayDelivery();
         });
 
         Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus) {
-            if ($object instanceof Orders_model && Settings::getReadyForPickupStatusId() === $statusId) {
-                $object->markShipdayDeliveryAsReadyForPickup();
+            if ($object instanceof Orders_model && Settings::isMappedShipdayStatus($statusId)) {
+                $object->createOrGetShipdayDelivery();
+
+                if (Settings::isReadyForPickupOrderStatus($statusId)) {
+                    $object->markShipdayDeliveryAsReadyForPickup();
+                }
+                else {
+                    $object->updateShipdayDeliveryStatus(
+                        Settings::getShipdayStatusMap()->flip()->get($statusId)
+                    );
+                }
+            }
+        });
+
+        Event::listen('admin.assignable.assigned', function ($model, $assignableLog) {
+            if ($model instanceof Orders_model
+                && $assignableLog->assignee
+                && $model->isDeliveryType()
+                && Settings::isShipdayDriverStaffGroup($assignableLog->assignee_group_id)
+            ) {
+                $model->createOrGetShipdayDelivery();
+                $assignableLog->assignee->createOrGetShipdayDriver();
+
+                $model->assignShipdayDeliveryToDriver($assignableLog->assignee);
             }
         });
     }

@@ -27,6 +27,12 @@ return [
                 'label' => 'lang:igniterlabs.shipday::default.label_api_key',
                 'type' => 'text',
             ],
+            'delivery_staff_group' => [
+                'label' => 'lang:igniterlabs.shipday::default.label_delivery_staff_group',
+                'type' => 'select',
+                'options' => [\Admin\Models\Staff_groups_model::class, 'getDropdownOptions'],
+                'comment' => 'lang:igniterlabs.shipday::default.help_delivery_staff_group',
+            ],
             'ready_for_pickup_status_id' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_ready_for_pickup_status',
                 'type' => 'select',
@@ -48,9 +54,10 @@ return [
         ],
         'rules' => [
             'api_key' => ['required', 'string'],
-            'ready_for_pickup_status_id' => ['required', 'different:delivered_status_id', 'different:canceled_status_id'],
-            'delivered_status_id' => ['required', 'different:canceled_status_id', 'different:ready_for_pickup_status_id'],
-            'canceled_status_id' => ['required', 'different:ready_for_pickup_status_id', 'different:delivered_status_id'],
+            'delivery_staff_group' => ['required', 'integer'],
+            'ready_for_pickup_status_id' => ['required', 'integer', 'different:delivered_status_id', 'different:canceled_status_id'],
+            'delivered_status_id' => ['required', 'integer', 'different:canceled_status_id', 'different:ready_for_pickup_status_id'],
+            'canceled_status_id' => ['required', 'integer', 'different:ready_for_pickup_status_id', 'different:delivered_status_id'],
         ],
     ],
 ];

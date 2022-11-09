@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Http;
 
 class Client
 {
+    protected static $carriersCache = [];
+
     protected $endpoint = 'https://api.shipday.com/';
 
     public function getOrder($uuid)
@@ -35,6 +37,13 @@ class Client
         return $this->sendRequest('orders/'.$uuid, [], 'delete');
     }
 
+    public function updateOrderStatus($uuid, $status)
+    {
+        return $this->sendRequest('orders/'.$uuid.'/status', [
+            'status' => $status,
+        ], 'put');
+    }
+
     public function readyForPickup($uuid)
     {
         return $this->sendRequest('orders/'.$uuid.'/meta', [
@@ -46,11 +55,12 @@ class Client
     //
     //
 
-    public function getCarrier($id)
+    public function getCarrier($email)
     {
-        $carriers = $this->sendRequest('carriers', [], 'get');
+        if (!self::$carriersCache)
+            self::$carriersCache = $this->sendRequest('carriers', [], 'get');
 
-        return collect($carriers)->firstWhere('id', $id);
+        return collect(self::$carriersCache)->firstWhere('email', $email);
     }
 
     public function createCarrier(array $params)
@@ -58,7 +68,7 @@ class Client
         return $this->sendRequest('carriers', $params);
     }
 
-    protected function sendRequest($uri, $data = [], $method = 'post'): array
+    protected function sendRequest($uri, $data = [], $method = 'post'): ?array
     {
         $response = Http::withToken(Settings::getApiKey(), 'Basic')
             ->acceptJson()
