@@ -13,8 +13,12 @@ class Webhook extends Controller
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($request->bearerToken())) {
             if ($this->shouldHandleEvent($request->input('event'))) {
-                if ($delivery = $this->getDeliveryByShipdayId($request->input('order.id'))) {
-                    $delivery->updateFromWebhook($request->input());
+                if ($delivery = $this->getActiveDeliveryByOrderId($request->input('order.order_number'))) {
+                    $delivery->fillFromRemote($request->input())->save();
+
+                    if ($delivery->order && ($statusId = Settings::getShipdayStatusMap()->get($delivery->status))) {
+                        $delivery->order->updateOrderStatus($statusId, ['notify' => false]);
+                    }
                 }
             }
         }
@@ -37,8 +41,10 @@ class Webhook extends Controller
      * @param string $shipdayId
      * @return \IgniterLabs\DoorDashDrive\Models\Delivery
      */
-    protected function getDeliveryByShipdayId($shipdayId)
+    protected function getActiveDeliveryByOrderId($orderId)
     {
-        return Delivery::where('shipday_id', $shipdayId)->first();
+        return Delivery::where('order_id', $orderId)
+            ->orderBy('shipday_id', 'desc')
+            ->first();
     }
 }

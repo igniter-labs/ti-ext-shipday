@@ -25,12 +25,18 @@ class Extension extends BaseExtension
         });
 
         Event::listen('admin.order.paymentProcessed', function ($order) {
-            if (!Settings::supportsOnDemandDelivery() && $order->isDeliveryType())
-                $order->createOrGetShipdayDelivery();
+            if (!Settings::supportsOnDemandDelivery()
+                && $order->isDeliveryType()
+                && Settings::isConnected()
+            ) $order->createOrGetShipdayDelivery();
         });
 
         Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus) {
-            if ($object instanceof Orders_model && Settings::isMappedShipdayStatus($statusId)) {
+            if ($object instanceof Orders_model
+                && $object->isDeliveryType()
+                && Settings::isConnected()
+                && Settings::isMappedShipdayStatus($statusId)
+            ) {
                 $object->createOrGetShipdayDelivery();
 
                 if (Settings::isReadyForPickupOrderStatus($statusId)) {
@@ -48,6 +54,7 @@ class Extension extends BaseExtension
             if ($model instanceof Orders_model
                 && $assignableLog->assignee
                 && $model->isDeliveryType()
+                && Settings::isConnected()
                 && Settings::isShipdayDriverStaffGroup($assignableLog->assignee_group_id)
             ) {
                 $model->createOrGetShipdayDelivery();

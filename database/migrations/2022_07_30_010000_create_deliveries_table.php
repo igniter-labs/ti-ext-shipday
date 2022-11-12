@@ -13,7 +13,7 @@ class CreateDeliveriesTable extends Migration
         Schema::create('igniterlabs_shipday_deliveries', function (Blueprint $table) {
             $table->engine = 'InnoDB';
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('order_id')->nullable()->unique()->index();
+            $table->unsignedBigInteger('order_id')->nullable()->index();
             $table->string('shipday_id')->unqiue();
             $table->bigInteger('fee');
             $table->string('status');
