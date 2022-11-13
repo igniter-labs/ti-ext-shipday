@@ -2,24 +2,23 @@
 
 namespace IgniterLabs\Shipday\Controllers;
 
-use IgniterLabs\Shipday\Models\Delivery;
+use Admin\Models\Orders_model;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 
 class Webhook extends Controller
 {
-    public function __invoke(Request $request)
+    public function __invoke(Request $request, $token)
     {
-        if (Settings::isConnected() && Settings::validateWebhookToken($request->bearerToken())) {
-            logger()->info('Shipday webhook received: '.json_encode($request->all()));
-
+        if (Settings::isConnected() && Settings::validateWebhookToken($token)) {
             if ($this->shouldHandleEvent($request->input('event'))) {
-                if ($delivery = $this->getActiveDeliveryByOrderId($request->input('order.order_number'))) {
-                    $delivery->fillFromRemote($request->input())->save();
+                if ($order = $this->getOrderByOrderId($request->input('order.order_number'))) {
+                    $log = $order->logShipdayDelivery($request->input());
 
-                    if ($delivery->order && ($statusId = Settings::getShipdayStatusMap()->get($delivery->status))) {
-                        $delivery->order->updateOrderStatus($statusId, ['notify' => false]);
+                    $statusId = Settings::getShipdayStatusMap()->get($log->status);
+                    if ($statusId && $order->status_id != $statusId) {
+                        $order->updateOrderStatus($statusId, ['notify' => false]);
                     }
                 }
             }
@@ -43,10 +42,8 @@ class Webhook extends Controller
      * @param string $shipdayId
      * @return \IgniterLabs\DoorDashDrive\Models\Delivery
      */
-    protected function getActiveDeliveryByOrderId($orderId)
+    protected function getOrderByOrderId($orderId)
     {
-        return Delivery::where('order_id', $orderId)
-            ->orderBy('shipday_id', 'desc')
-            ->first();
+        return Orders_model::find($orderId);
     }
 }

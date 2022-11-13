@@ -12,12 +12,7 @@
     </ol>
     <div>
         Webhook callback URL: <code>
-            {{ route('igniterlabs_shipday_webhook') }}
-        </code>
-    </div>
-    <div>
-        Authorization Header: <code>
-            Bearer {{ $formModel->webhook_token }}
+            {{ route('igniterlabs_shipday_webhook', $formModel->webhook_token) }}
         </code>
     </div>
 </div>

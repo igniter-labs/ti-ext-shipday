@@ -8,7 +8,7 @@ use Igniter\Flame\Database\Model;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\Flame\Traits\ExtensionTrait;
 use IgniterLabs\Shipday\Classes\Client;
-use IgniterLabs\Shipday\Models\Delivery;
+use IgniterLabs\Shipday\Models\DeliveryLog;
 use System\Actions\ModelAction;
 
 class ManagesShipdayDelivery extends ModelAction
@@ -19,7 +19,7 @@ class ManagesShipdayDelivery extends ModelAction
     {
         parent::__construct($model);
 
-        $this->model->relation['hasOne']['shipday_delivery'] = [Delivery::class, 'delete' => true];
+        $this->model->relation['hasMany']['shipday_logs'] = [DeliveryLog::class, 'delete' => true];
     }
 
     public function shipdayId()
@@ -73,7 +73,7 @@ class ManagesShipdayDelivery extends ModelAction
 
         $response = resolve(Client::class)->insertOrder($params);
 
-        $this->storeShipdayDelivery($response, $params);
+        $this->logShipdayDelivery($response, $params);
 
         return $response;
     }
@@ -88,20 +88,6 @@ class ManagesShipdayDelivery extends ModelAction
         );
     }
 
-    public function updateAsShipdayDelivery()
-    {
-        if (!$response = $this->asShipdayDelivery())
-            throw new SystemException('Unable to update Shipday delivery, shipday order not found');
-
-        $delivery = $this->model->shipday_delivery;
-        $delivery->fillFromRemote($response)->save();
-
-        $this->model->shipday_id = $delivery->isCancelled() ? null : $response['orderId'];
-        $this->model->save();
-
-        return $delivery;
-    }
-
     public function updateShipdayDeliveryStatus($shipdayStatus)
     {
         $this->assertShipdayDelivery();
@@ -111,7 +97,12 @@ class ManagesShipdayDelivery extends ModelAction
         if (!$response || !array_get($response, 'success'))
             throw new SystemException("Unable to update Shipday delivery status to {$shipdayStatus}.");
 
-        return $this->updateAsShipdayDelivery();
+        return $this->logShipdayDelivery($response, ['status' => $shipdayStatus]);
+    }
+
+    public function logShipdayDelivery(array $response = [], array $request = [])
+    {
+        return DeliveryLog::logUpdate($this->model, $response, $request);
     }
 
     public function markShipdayDeliveryAsReadyForPickup()
@@ -130,26 +121,6 @@ class ManagesShipdayDelivery extends ModelAction
         return rescue(function () use ($driver) {
             return resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipday_id);
         });
-    }
-
-    protected function storeShipdayDelivery($response, $request)
-    {
-        $delivery = $this->model->shipday_delivery()->updateOrCreate([
-            'order_id' => $this->shipdayOrderNumber(),
-            'shipday_id' => $response['orderId'],
-        ], [
-            'fee' => array_get($request, 'deliveryFee'),
-            'status' => array_get($response, 'orderStatus.orderState', 'SENT'),
-            'request_data' => $request,
-            'response_data' => $response,
-        ]);
-
-        $this->model->shipday_id = $response['orderId'];
-        $this->model->save();
-
-        $this->model->shipday_delivery = $delivery;
-
-        return $this;
     }
 
     protected function makeRequestParams(array $params = [])

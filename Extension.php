@@ -24,6 +24,39 @@ class Extension extends BaseExtension
             $model->implement[] = ManagesShipdayDriver::class;
         });
 
+        \Admin\Controllers\Orders::extendFormFields(function ($form, $model, $context) {
+            if (!$model instanceof Orders_model
+                || !$model->isDeliveryType()
+                || !Settings::isConnected()
+            ) return;
+
+            $form->addTabFields([
+                'shipday_logs' => [
+                    'tab' => 'lang:igniterlabs.shipday::default.text_payment_logs',
+                    'type' => 'datatable',
+                    'useAjax' => true,
+                    'defaultSort' => ['created_at', 'desc'],
+                    'columns' => [
+                        'created_since' => [
+                            'title' => 'lang:admin::lang.orders.column_time_date',
+                        ],
+                        'shipday_id' => [
+                            'title' => 'lang:igniterlabs.shipday::default.column_shipday_id',
+                        ],
+                        'status' => [
+                            'title' => 'lang:admin::lang.label_status',
+                        ],
+                        'carrier_id' => [
+                            'title' => 'lang:igniterlabs.shipday::default.column_carrier_id',
+                        ],
+                        'tracking_url' => [
+                            'title' => 'lang:igniterlabs.shipday::default.column_tracking_url',
+                        ],
+                    ],
+                ],
+            ]);
+        });
+
         Event::listen('admin.order.paymentProcessed', function ($order) {
             if (!Settings::supportsOnDemandDelivery()
                 && $order->isDeliveryType()
@@ -35,7 +68,7 @@ class Extension extends BaseExtension
             if ($object instanceof Orders_model
                 && $object->isDeliveryType()
                 && Settings::isConnected()
-                && Settings::isMappedShipdayStatus($statusId)
+                && ($shipdayStatus = Settings::getShipdayStatusMap()->flip()->get($statusId))
             ) {
                 $object->createOrGetShipdayDelivery();
 
@@ -43,9 +76,7 @@ class Extension extends BaseExtension
                     $object->markShipdayDeliveryAsReadyForPickup();
                 }
                 else {
-                    $object->updateShipdayDeliveryStatus(
-                        Settings::getShipdayStatusMap()->flip()->get($statusId)
-                    );
+                    $object->updateShipdayDeliveryStatus($shipdayStatus);
                 }
             }
         });

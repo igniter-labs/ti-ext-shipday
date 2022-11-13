@@ -39,6 +39,18 @@ return [
                 'options' => ['Admin\Models\Statuses_model', 'getDropdownOptionsForOrder'],
                 'comment' => 'lang:igniterlabs.shipday::default.help_ready_for_pickup_status',
             ],
+            'accepted_status_id' => [
+                'label' => 'lang:igniterlabs.shipday::default.label_accepted_status_id',
+                'type' => 'select',
+                'options' => ['Admin\Models\Statuses_model', 'getDropdownOptionsForOrder'],
+                'comment' => 'lang:igniterlabs.shipday::default.help_accepted_status_id',
+            ],
+            'picked_up_status_id' => [
+                'label' => 'lang:igniterlabs.shipday::default.label_picked_up_status_id',
+                'type' => 'select',
+                'options' => ['Admin\Models\Statuses_model', 'getDropdownOptionsForOrder'],
+                'comment' => 'lang:igniterlabs.shipday::default.help_picked_up_status_id',
+            ],
             'delivered_status_id' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_delivered_status',
                 'type' => 'select',

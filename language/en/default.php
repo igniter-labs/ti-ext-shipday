@@ -2,6 +2,12 @@
 
 return [
     'text_settings' => 'Shipday Delivery Settings',
+    'text_payment_logs' => 'Shipday Updates',
+
+    'column_shipday_id' => 'Shipday ID',
+    'column_status' => 'Status',
+    'column_carrier_id' => 'Carrier ID',
+    'column_tracking_url' => 'Tracking URL',
 
     'label_cart_condition_title' => 'Shipday Delivery Fee',
     'label_cart_condition_description' => 'Shipday Delivery Fee',
@@ -12,6 +18,8 @@ return [
     'label_prod_key_id' => 'Production Key ID',
     'label_prod_signing_secret' => 'Production Signing Secret',
     'label_ready_for_pickup_status' => 'Delivery Ready for Pickup Status',
+    'label_accepted_status_id' => 'Delivery Accepted Status',
+    'label_picked_up_status_id' => 'Delivery Picked Up Status',
     'label_delivered_status' => 'Delivery Completed Status',
     'label_canceled_status' => 'Delivery Canceled Status',
     'label_delivery_staff_group' => 'Delivery Staff Group',
@@ -19,6 +27,8 @@ return [
     'help_settings' => 'Configure Shipday settings',
     'help_permission' => 'Ability to manage Shipday settings',
     'help_ready_for_pickup_status' => 'When an order is updated to the chosen status, mark the shipday order as ready to pick up.',
+    'help_accepted_status_id' => 'Select the status that will be used to mark an order as accepted.',
+    'help_picked_up_status_id' => 'Select the status that will be used to mark an order as picked up.',
     'help_delivered_status' => 'Select the order status to set when an order is delivered',
     'help_canceled_status' => 'Select the order status to set when a delivery is canceled',
     'help_delivery_staff_group' => 'Select the group of the staff with delivery capabilities. A corresponding carrier account will be created on Shipday if none already exists with the same email address.',

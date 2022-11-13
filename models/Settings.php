@@ -65,13 +65,6 @@ class Settings extends Model
         return false;
     }
 
-    public static function isMappedShipdayStatus($statusId)
-    {
-        return $statusId == self::getReadyForPickupStatusId()
-            || $statusId == self::getCompletedStatusId()
-            || $statusId == self::getCanceledStatusId();
-    }
-
     public static function isShipdayDriverStaffGroup($groupId)
     {
         return (int)self::get('delivery_staff_group') === $groupId;
@@ -85,6 +78,16 @@ class Settings extends Model
     public static function getReadyForPickupStatusId()
     {
         return self::get('ready_for_pickup_status_id');
+    }
+
+    public static function getAcceptedStatusId()
+    {
+        return self::get('accepted_status_id');
+    }
+
+    public static function getPickedUpStatusId()
+    {
+        return self::get('picked_up_status_id');
     }
 
     public static function getCompletedStatusId()
@@ -101,6 +104,8 @@ class Settings extends Model
     {
         return collect([
             'SENT' => self::getReadyForPickupStatusId(),
+            'ORDER_ACCEPTED_AND_STARTED' => self::getAcceptedStatusId(),
+            'PICKED_UP' => self::getPickedUpStatusId(),
             'ALREADY_DELIVERED' => self::getCompletedStatusId(),
             'FAILED_DELIVERY' => self::getCanceledStatusId(),
         ]);
