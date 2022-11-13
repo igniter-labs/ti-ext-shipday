@@ -12,6 +12,8 @@ class Webhook extends Controller
     public function __invoke(Request $request)
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($request->bearerToken())) {
+            logger()->info('Shipday webhook received: '.json_encode($request->all()));
+
             if ($this->shouldHandleEvent($request->input('event'))) {
                 if ($delivery = $this->getActiveDeliveryByOrderId($request->input('order.order_number'))) {
                     $delivery->fillFromRemote($request->input())->save();
