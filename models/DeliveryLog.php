@@ -35,12 +35,12 @@ class DeliveryLog extends Model
         $record->request_data = $request;
         $record->response_data = $response;
 
-        $log = $record->save();
+        $record->save();
 
-        $model->shipday_id = $log->isCancelled() ? null : $log->shipday_id;
+        $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
         $model->save();
 
-        return $log;
+        return $record;
     }
 
     public function getCreatedSinceAttribute($value)
