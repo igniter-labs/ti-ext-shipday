@@ -108,7 +108,7 @@ class Settings extends Model
             'PICKED_UP' => self::getPickedUpStatusId(),
             'ALREADY_DELIVERED' => self::getCompletedStatusId(),
             'FAILED_DELIVERY' => self::getCanceledStatusId(),
-        ]);
+        ])->filter();
     }
 
     public function getWebhookTokenAttribute($value)
