@@ -15,8 +15,8 @@ class CreateDeliveryLogsTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_id')->nullable()->index();
             $table->string('shipday_id')->unqiue();
-            $table->bigInteger('fee');
-            $table->string('status');
+            $table->bigInteger('fee')->nullable();
+            $table->string('status')->nullable();
             $table->bigInteger('carrier_id')->nullable();
             $table->string('tracking_url')->index()->nullable();
             $table->text('request_data')->nullable();
