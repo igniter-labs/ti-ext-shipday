@@ -30,7 +30,7 @@ class DeliveryLog extends Model
         $record->shipday_id = array_get($response, 'orderId', array_get($response, 'order.id'));
         $record->fee = array_get($request, 'deliveryFee');
         $record->status = array_get($response, 'orderStatus.orderState', array_get($response, 'order_status', 'SENT'));
-        $record->tracking_url = array_get($response, 'tracking_url', array_get($response, 'order.tracking_url'));
+        $record->tracking_url = array_get($response, 'shipday_order_details.trackingLink');
         $record->carrier_id = array_get($response, 'assignedCarrier.id', array_get($response, 'carrier.id'));
         $record->request_data = $request;
         $record->response_data = $response;

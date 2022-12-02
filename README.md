@@ -4,16 +4,10 @@ From a single platform, you can use your own in house drivers or make use of thi
 
 Shipday has a direct integration with TastyIgniter. Any delivery order a customer places on your TastyIgniter website will instantly be forwarded to Shipday for dispatch and delivery tracking.
 
-### Installation
-
-Clone [the repository](https://github.com/igniter-labs/ti-ext-shipday) into **extensions/igniterlabs/shipday**
-
-To install it with Composer, run `composer require igniter-labs/ti-ext-shipday` from your project root.
-
 ### Configuration
 
 - Go to **System > Settings > Shipday Delivery Settings** to enter your API Key (follow instructions on the page)
-- Choose a status under Delivery Completed and Delivery Failed to automatically update the order status when the delivery is completed or failed.
+- Choose a status under Delivery Completed and Delivery Failed to automatically update the order status when the delivery is marked as completed or failed.
 
 [comment]: <> (- For On-Demand Delivery using 3rd party providers, disable the default `delivery` Cart Condition and enable the `shipday` Cart Condition under **System > Settings > Cart Settings**)
 

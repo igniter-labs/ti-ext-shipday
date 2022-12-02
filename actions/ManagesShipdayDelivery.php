@@ -102,6 +102,8 @@ class ManagesShipdayDelivery extends ModelAction
 
     public function logShipdayDelivery(array $response = [], array $request = [])
     {
+        $response['shipday_order_details'] = $this->asShipdayDelivery();
+
         return DeliveryLog::logUpdate($this->model, $response, $request);
     }
 
