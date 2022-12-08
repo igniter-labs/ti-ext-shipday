@@ -72,6 +72,8 @@ class ManagesShipdayDelivery extends ModelAction
         $params = $this->makeRequestParams($params);
 
         $response = resolve(Client::class)->insertOrder($params);
+        $this->model->shipday_id = $response['orderId'];
+        $this->model->save();
 
         $this->logShipdayDelivery($response, $params);
 

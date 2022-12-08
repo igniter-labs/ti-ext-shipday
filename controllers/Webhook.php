@@ -13,7 +13,8 @@ class Webhook extends Controller
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($token)) {
             if ($this->shouldHandleEvent($request->input('event'))) {
-                if ($order = $this->getOrderByOrderId($request->input('order.order_number'))) {
+                $order = $this->getOrderByOrderId($request->input('order.order_number'));
+                if ($order && $order->isDeliveryType() && Settings::isConnected()) {
                     $log = $order->logShipdayDelivery($request->input());
 
                     $statusId = Settings::getShipdayStatusMap()->get($log->status);
