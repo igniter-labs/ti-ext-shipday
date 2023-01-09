@@ -6,9 +6,10 @@ Shipday has a direct integration with TastyIgniter. Any delivery order a custome
 
 ### Configuration
 
+- Signup for a Shipday account.
+- Install and enable the extension in your TastyIgniter website.
+- Login to your Shipday account to get the Shipday API key under integrations tab
 - Go to **System > Settings > Shipday Delivery Settings** to enter your API Key (follow instructions on the page)
-- Choose a status under Delivery Completed and Delivery Failed to automatically update the order status when the delivery is marked as completed or failed.
+- Choose a status under **Delivery Completed and Delivery Failed** to automatically update the order status when the delivery is marked as completed or failed.
+- Now if anyone places a delivery order on your TastyIgniter site it should also appear on your Shipday dispatch dashboard.
 
-[comment]: <> (- For On-Demand Delivery using 3rd party providers, disable the default `delivery` Cart Condition and enable the `shipday` Cart Condition under **System > Settings > Cart Settings**)
-
-[comment]: <> (- Enable **Reject Orders Outside Delivery Area** under **System > Settings > Sales**. This will require customers to enter their delivery address before placing an order.)

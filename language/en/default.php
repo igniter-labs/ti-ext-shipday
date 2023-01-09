@@ -31,7 +31,7 @@ return [
     'help_picked_up_status_id' => 'Select the order status to set when a delivery is marked as picked up on shipday',
     'help_delivered_status' => 'Select the order status to set when a delivery is marked as delivered on shipday',
     'help_canceled_status' => 'Select the order status to set when a delivery is marked as canceled on shipday',
-    'help_delivery_staff_group' => 'Select the group of the staff with delivery capabilities. A corresponding carrier account will be created on Shipday if none already exists with the same email address.',
+    'help_delivery_staff_group' => 'Select the staff group with delivery capabilities. Staff in selected group will have a corresponding carrier account created on Shipday if none already exists with the same email address.',
 
     'alert_distance_too_long' => 'Your delivery address is too far from the restaurant. Please choose another address.',
     'alert_delivery_address_changed' => 'Your delivery address has been changed. Please review the recalculated delivery fee.',
