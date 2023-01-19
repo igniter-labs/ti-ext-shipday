@@ -132,7 +132,7 @@ class ManagesShipdayDelivery extends ModelAction
         $orderTotals = $this->model->getOrderTotals()->keyBy('code');
 
         $params['orderNumber'] = $this->shipdayOrderNumber();
-        $params['orderSource'] = 'TastyIgniter';
+        $params['orderSource'] = $this->model->location->getName();
 
         $params['customerName'] = $this->model->customer_name;
         $params['customerAddress'] = $this->model->address->formatted_address;
@@ -165,6 +165,10 @@ class ManagesShipdayDelivery extends ModelAction
                 })->all(),
             ];
         })->all();
+
+        $eventResult = $this->model->fireSystemEvent('shipday.extendRequestParams', [$params], false);
+        if (is_array($eventResult))
+            $params = array_merge_recursive($params, ...array_filter($eventResult));
 
         return $params;
     }

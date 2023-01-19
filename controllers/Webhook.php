@@ -13,7 +13,7 @@ class Webhook extends Controller
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($token)) {
             if ($this->shouldHandleEvent($request->input('event'))) {
-                $order = $this->getOrderByOrderId($request->input('order.order_number'));
+                $order = $this->getOrderByShipdayOrderId($request->input('order.id'));
                 if ($order && $order->isDeliveryType() && Settings::isConnected()) {
                     $log = $order->logShipdayDelivery($request->input());
 
@@ -43,8 +43,8 @@ class Webhook extends Controller
      * @param string $shipdayId
      * @return \Admin\Models\Orders_model|null
      */
-    protected function getOrderByOrderId($orderId)
+    protected function getOrderByShipdayOrderId($orderId)
     {
-        return Orders_model::find($orderId);
+        return Orders_model::firstWhere('shipday_id', $orderId);
     }
 }
