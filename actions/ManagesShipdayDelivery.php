@@ -17,6 +17,16 @@ class ManagesShipdayDelivery extends ModelAction
         parent::__construct($model);
 
         $this->model->relation['hasMany']['shipday_logs'] = [DeliveryLog::class, 'delete' => true];
+
+        $this->model->bindEvent('model.mailGetData', function () {
+            if (!$this->model->hasShipdayDelivery())
+                return [];
+
+            return [
+                'shipday_id' => $this->shipdayId(),
+                'shipday_tracking_url' => array_get($this->model->asShipdayDelivery(), 'trackingLink'),
+            ];
+        });
     }
 
     public function shipdayId()
