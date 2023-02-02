@@ -68,16 +68,11 @@ class Extension extends BaseExtension
             if ($object instanceof Orders_model
                 && $object->isDeliveryType()
                 && Settings::isConnected()
-                && ($shipdayStatus = Settings::getShipdayStatusMap()->flip()->get($statusId))
+                && (Settings::isReadyForPickupOrderStatus($statusId))
             ) {
-                $object->createOrGetShipdayDelivery();
-
-                if (Settings::isReadyForPickupOrderStatus($statusId)) {
+                $shipdayDelivery = $object->createOrGetShipdayDelivery();
+                if (array_get($shipdayDelivery, 'status') !== 'READY_FOR_PICKUP')
                     $object->markShipdayDeliveryAsReadyForPickup();
-                }
-                else {
-                    $object->updateShipdayDeliveryStatus($shipdayStatus);
-                }
             }
         });
 
@@ -85,10 +80,10 @@ class Extension extends BaseExtension
             if ($model instanceof Orders_model
                 && $assignableLog->assignee
                 && $model->isDeliveryType()
+                && $model->hasShipdayDelivery()
                 && Settings::isConnected()
                 && Settings::isShipdayDriverStaffGroup($assignableLog->assignee_group_id)
             ) {
-                $model->createOrGetShipdayDelivery();
                 $assignableLog->assignee->createOrGetShipdayDriver();
 
                 $model->assignShipdayDeliveryToDriver($assignableLog->assignee);

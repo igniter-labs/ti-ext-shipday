@@ -103,7 +103,6 @@ class Settings extends Model
     public static function getShipdayStatusMap()
     {
         return collect([
-            'SENT' => self::getReadyForPickupStatusId(),
             'ORDER_ACCEPTED_AND_STARTED' => self::getAcceptedStatusId(),
             'PICKED_UP' => self::getPickedUpStatusId(),
             'ALREADY_DELIVERED' => self::getCompletedStatusId(),

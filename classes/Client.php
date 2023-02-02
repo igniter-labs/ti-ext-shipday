@@ -70,11 +70,14 @@ class Client
 
     protected function sendRequest($uri, $data = [], $method = 'post'): ?array
     {
-        $http = Http::acceptJson()
-            ->withToken(Settings::getApiKey(), 'Basic');
+        $http = Http::withToken(Settings::getApiKey(), 'Basic');
 
-        if ($method === 'post')
+        if ($method !== 'get') {
             $http->asJson();
+        }
+        else {
+            $http->acceptJson();
+        }
 
         $response = $http->$method($this->endpoint.$uri, $data);
 
