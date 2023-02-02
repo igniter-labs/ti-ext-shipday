@@ -140,6 +140,12 @@ class ManagesShipdayDelivery extends ModelAction
         $params['restaurantAddress'] = format_address($this->model->location->getAddress(), false);
         $params['restaurantPhoneNumber'] = $this->model->location->getTelephone();
 
+        if ($this->model->location->location_lat)
+            $params['pickupLatitude'] = $this->model->location->location_lat;
+
+        if ($this->model->location->location_lng)
+            $params['pickupLongitude'] = $this->model->location->location_lng;
+
         $params['deliveryInstruction'] = $this->model->comment;
         $params['paymentMethod'] = $this->model->payment == 'cod' ? 'cash' : 'credit_card';
 
