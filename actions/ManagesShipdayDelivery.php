@@ -6,15 +6,12 @@ use Admin\Models\Locations_model;
 use Admin\Models\Staffs_model;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Exception\SystemException;
-use Igniter\Flame\Traits\ExtensionTrait;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Models\DeliveryLog;
 use System\Actions\ModelAction;
 
 class ManagesShipdayDelivery extends ModelAction
 {
-    use ExtensionTrait;
-
     public function __construct(Model $model)
     {
         parent::__construct($model);
@@ -123,7 +120,7 @@ class ManagesShipdayDelivery extends ModelAction
         $driver->assertShipdayDriver();
 
         return rescue(function () use ($driver) {
-            return resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipday_id);
+            return resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipdayId());
         });
     }
 

@@ -3,24 +3,12 @@
 namespace IgniterLabs\Shipday\Actions;
 
 use Exception;
-use Igniter\Flame\Database\Model;
 use Igniter\Flame\Exception\SystemException;
-use Igniter\Flame\Traits\ExtensionTrait;
 use IgniterLabs\Shipday\Classes\Client;
-use IgniterLabs\Shipday\Models\Delivery;
 use System\Actions\ModelAction;
 
 class ManagesShipdayDriver extends ModelAction
 {
-    use ExtensionTrait;
-
-    public function __construct(Model $model)
-    {
-        parent::__construct($model);
-
-        $this->model->relation['hasMany']['shipday_deliveries'] = [Delivery::class];
-    }
-
     public function shipdayId()
     {
         return $this->model->shipday_id;

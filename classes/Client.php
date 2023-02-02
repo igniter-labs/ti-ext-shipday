@@ -70,10 +70,13 @@ class Client
 
     protected function sendRequest($uri, $data = [], $method = 'post'): ?array
     {
-        $response = Http::withToken(Settings::getApiKey(), 'Basic')
-            ->acceptJson()
-            ->withoutRedirecting()
-            ->$method($this->endpoint.$uri, $data);
+        $http = Http::acceptJson()
+            ->withToken(Settings::getApiKey(), 'Basic');
+
+        if ($method === 'post')
+            $http->asJson();
+
+        $response = $http->$method($this->endpoint.$uri, $data);
 
         if (!$response->successful()) {
             throw new ClientException($response->json());
