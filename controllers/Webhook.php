@@ -12,12 +12,13 @@ class Webhook extends Controller
     public function __invoke(Request $request, $token)
     {
         if (Settings::isConnected() && Settings::validateWebhookToken($token)) {
-            if ($this->shouldHandleEvent($request->input('event'))) {
+            if ($this->shouldHandleEvent($eventName = $request->input('event'))) {
                 $order = $this->getOrderByShipdayOrderId($request->input('order.id'));
                 if ($order && $order->isDeliveryType() && Settings::isConnected()) {
                     $log = $order->logShipdayDelivery($request->input());
 
-                    $statusId = Settings::getShipdayStatusMap()->get($log->status);
+                    $eventName = $eventName !== 'ORDER_COMPLETED' ? $log->status : $eventName;
+                    $statusId = Settings::getShipdayStatusMap()->get($eventName);
                     if ($statusId && $order->status_id != $statusId) {
                         $order->updateOrderStatus($statusId, ['notify' => false]);
                     }

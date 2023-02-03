@@ -106,6 +106,7 @@ class Settings extends Model
             'ORDER_ACCEPTED_AND_STARTED' => self::getAcceptedStatusId(),
             'PICKED_UP' => self::getPickedUpStatusId(),
             'ALREADY_DELIVERED' => self::getCompletedStatusId(),
+            'ORDER_COMPLETED' => self::getCompletedStatusId(),
             'FAILED_DELIVERY' => self::getCanceledStatusId(),
         ])->filter();
     }
