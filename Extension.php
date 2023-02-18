@@ -67,8 +67,9 @@ class Extension extends BaseExtension
         Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus) {
             if ($object instanceof Orders_model
                 && $object->isDeliveryType()
+                && $object->hasShipdayDelivery()
                 && Settings::isConnected()
-                && (Settings::isReadyForPickupOrderStatus($statusId))
+                && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
                 $shipdayDelivery = $object->createOrGetShipdayDelivery();
                 if (array_get($shipdayDelivery, 'status') !== 'READY_FOR_PICKUP')
