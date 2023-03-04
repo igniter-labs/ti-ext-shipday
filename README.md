@@ -4,6 +4,12 @@ From a single platform, you can use your own in house drivers or make use of thi
 
 Shipday has a direct integration with TastyIgniter. Any delivery order a customer places on your TastyIgniter website will instantly be forwarded to Shipday for dispatch and delivery tracking.
 
+### Features
+- Restaurant owners can manage their deliveries efficiently on Shipday. This includes assigning drivers to orders and tracking deliveries
+- Customers can track their orders in real-time and receive notifications about the estimated delivery time and the status of their order.
+- Restaurant owners can manage their drivers, assign them to orders, and track their performance
+- Works well with the default TastyIgniter delivery cart condition.
+
 ### Configuration
 
 - Signup for a Shipday account.
