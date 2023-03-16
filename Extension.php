@@ -58,10 +58,12 @@ class Extension extends BaseExtension
         });
 
         Event::listen('admin.order.paymentProcessed', function ($order) {
-            if (!Settings::supportsOnDemandDelivery()
-                && $order->isDeliveryType()
-                && Settings::isConnected()
-            ) $order->createOrGetShipdayDelivery();
+            rescue(function () use ($order) {
+                if (!Settings::supportsOnDemandDelivery()
+                    && $order->isDeliveryType()
+                    && Settings::isConnected()
+                ) $order->createOrGetShipdayDelivery();
+            });
         });
 
         Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus) {
@@ -71,9 +73,11 @@ class Extension extends BaseExtension
                 && Settings::isConnected()
                 && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
-                $shipdayDelivery = $object->createOrGetShipdayDelivery();
-                if (array_get($shipdayDelivery, 'status') !== 'READY_FOR_PICKUP')
-                    $object->markShipdayDeliveryAsReadyForPickup();
+                rescue(function () use ($object) {
+                    $shipdayDelivery = $object->createOrGetShipdayDelivery();
+                    if (array_get($shipdayDelivery, 'status') !== 'READY_FOR_PICKUP')
+                        $object->markShipdayDeliveryAsReadyForPickup();
+                });
             }
         });
 
