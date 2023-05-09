@@ -17,6 +17,7 @@ return [
     'label_prod_developer_id' => 'Production Developer ID',
     'label_prod_key_id' => 'Production Key ID',
     'label_prod_signing_secret' => 'Production Signing Secret',
+    'label_delivery_wait_time' => 'Delivery Wait Time',
     'label_ready_for_pickup_status' => 'Delivery Ready for Pickup Status',
     'label_accepted_status_id' => 'Delivery Accepted Status',
     'label_picked_up_status_id' => 'Delivery Picked Up Status',
@@ -26,6 +27,7 @@ return [
 
     'help_settings' => 'Configure Shipday settings',
     'help_permission' => 'Ability to manage Shipday settings',
+    'help_delivery_wait_time' => ' Set in minutes the average time it takes an order to be ready for delivery. This is used to calculate the estimated delivery pick up time.',
     'help_ready_for_pickup_status' => 'When an order is updated to the chosen status, mark the shipday order as ready to pick up.',
     'help_accepted_status_id' => 'Select the order status to set when an order is marked as accepted on shipday',
     'help_picked_up_status_id' => 'Select the order status to set when a delivery is marked as picked up on shipday',

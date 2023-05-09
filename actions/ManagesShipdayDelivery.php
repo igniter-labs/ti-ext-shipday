@@ -140,6 +140,11 @@ class ManagesShipdayDelivery extends ModelAction
 
         $params['orderNumber'] = $this->shipdayOrderNumber();
         $params['orderSource'] = $this->model->location->getName();
+        $params['expectedDeliveryDate'] = $this->model->order_date->toDateString();
+        $params['expectedPickupTime'] = $this->model->order_date_time->subMinutes(
+            $this->model->location->shipdayGetDeliveryWaitTime()
+        )->toTimeString();
+        $params['expectedDeliveryTime'] = $this->model->order_date_time->toTimeString();
 
         $params['customerName'] = $this->model->customer_name;
         $params['customerAddress'] = $this->model->address->formatted_address;

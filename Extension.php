@@ -2,7 +2,9 @@
 
 namespace IgniterLabs\Shipday;
 
+use Admin\Models\Locations_model;
 use Admin\Models\Orders_model;
+use Admin\Requests\Location;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDriver;
 use IgniterLabs\Shipday\Models\Settings;
@@ -94,6 +96,14 @@ class Extension extends BaseExtension
                 $model->assignShipdayDeliveryToDriver($assignableLog->assignee);
             }
         });
+
+        $this->extendLocationOptionsFields();
+
+        Locations_model::extend(function ($model) {
+            $model->addDynamicMethod('shipdayGetDeliveryWaitTime', function () use ($model) {
+                return $model->getOption('shipday_delivery_wait_time', 15);
+            });
+        });
     }
 
     /**
@@ -123,5 +133,33 @@ class Extension extends BaseExtension
                 'permissions' => ['IgniterLabs.Shipday.ManageSettings'],
             ],
         ];
+    }
+
+    protected function extendLocationOptionsFields()
+    {
+        Event::listen('admin.locations.defineOptionsFormFields', function () {
+            return [
+                'shipday_delivery_wait_time' => [
+                    'label' => 'lang:igniterlabs.shipday::default.label_delivery_wait_time',
+                    'accordion' => 'lang:admin::lang.locations.text_tab_general_options',
+                    'type' => 'number',
+                    'default' => 15,
+                    'comment' => 'lang:igniterlabs.shipday::default.help_delivery_wait_time',
+                ],
+            ];
+        });
+
+        Event::listen('system.formRequest.extendValidator', function ($formRequest, $dataHolder) {
+            if (!$formRequest instanceof Location)
+                return;
+
+            $dataHolder->attributes = array_merge($dataHolder->attributes, [
+                'options.shipday_delivery_wait_time' => lang('igniterlabs.vanellix::default.pedidosya.label_delivery_wait_time'),
+            ]);
+
+            $dataHolder->rules = array_merge($dataHolder->rules, [
+                'options.shipday_delivery_wait_time' => ['number', 'min:0'],
+            ]);
+        });
     }
 }
