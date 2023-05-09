@@ -158,7 +158,7 @@ class Extension extends BaseExtension
             ]);
 
             $dataHolder->rules = array_merge($dataHolder->rules, [
-                'options.delivery_wait_time' => ['number', 'min:0'],
+                'options.delivery_wait_time' => ['integer', 'min:0'],
             ]);
         });
     }
