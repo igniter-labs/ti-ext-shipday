@@ -100,8 +100,8 @@ class Extension extends BaseExtension
         $this->extendLocationOptionsFields();
 
         Locations_model::extend(function ($model) {
-            $model->addDynamicMethod('shipdayGetDeliveryWaitTime', function () use ($model) {
-                return $model->getOption('shipday_delivery_wait_time', 15);
+            $model->addDynamicMethod('getDeliveryWaitTime', function () use ($model) {
+                return $model->getOption('delivery_wait_time', 15);
             });
         });
     }
@@ -139,9 +139,9 @@ class Extension extends BaseExtension
     {
         Event::listen('admin.locations.defineOptionsFormFields', function () {
             return [
-                'shipday_delivery_wait_time' => [
+                'delivery_wait_time' => [
                     'label' => 'lang:igniterlabs.shipday::default.label_delivery_wait_time',
-                    'accordion' => 'lang:admin::lang.locations.text_tab_general_options',
+                    'accordion' => 'lang:igniter.local::default.text_tab_delivery_order',
                     'type' => 'number',
                     'default' => 15,
                     'comment' => 'lang:igniterlabs.shipday::default.help_delivery_wait_time',
@@ -154,11 +154,11 @@ class Extension extends BaseExtension
                 return;
 
             $dataHolder->attributes = array_merge($dataHolder->attributes, [
-                'options.shipday_delivery_wait_time' => lang('igniterlabs.vanellix::default.pedidosya.label_delivery_wait_time'),
+                'options.delivery_wait_time' => lang('igniterlabs.shipday::default.label_delivery_wait_time'),
             ]);
 
             $dataHolder->rules = array_merge($dataHolder->rules, [
-                'options.shipday_delivery_wait_time' => ['number', 'min:0'],
+                'options.delivery_wait_time' => ['number', 'min:0'],
             ]);
         });
     }

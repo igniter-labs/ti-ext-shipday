@@ -30,9 +30,14 @@ class CreateDeliveryLogsTable extends Migration
             });
         }
 
-        if (!Schema::hasColumn('staffs', 'shipday_id')) {
+        if (!Schema::hasColumn('staffs', 'telephone')) {
             Schema::table('staffs', function (Blueprint $table) {
                 $table->string('telephone')->nullable();
+            });
+        }
+
+        if (!Schema::hasColumn('staffs', 'shipday_id')) {
+            Schema::table('staffs', function (Blueprint $table) {
                 $table->bigInteger('shipday_id')->nullable();
             });
         }
