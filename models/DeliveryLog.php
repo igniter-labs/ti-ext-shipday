@@ -37,8 +37,10 @@ class DeliveryLog extends Model
 
         $record->save();
 
-        $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
-        $model->save();
+        $model::withoutEvents(function () use ($record, $model) {
+            $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
+            $model->save();
+        });
 
         return $record;
     }
