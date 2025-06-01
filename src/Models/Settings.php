@@ -3,10 +3,11 @@
 namespace IgniterLabs\Shipday\Models;
 
 use Igniter\Flame\Database\Model;
+use Igniter\System\Actions\SettingsModel;
 
 class Settings extends Model
 {
-    public $implement = [\System\Actions\SettingsModel::class];
+    public array $implement = [SettingsModel::class];
 
     // A unique code
     public $settingsCode = 'igniterlabs_shipday_settings';
@@ -19,6 +20,7 @@ class Settings extends Model
     public static function isConnected()
     {
         return self::isConfigured()
+            && strlen(self::get('api_key'))
             && strlen(self::get('webhook_token'));
     }
 
@@ -49,7 +51,7 @@ class Settings extends Model
         $base64UrlSignature = self::base64UrlEncode(hash_hmac('sha256',
             $base64UrlHeader.".".$base64UrlPayload,
             self::base64UrlDecode(self::getSigningSecret()),
-            true
+            true,
         ));
 
         return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
@@ -63,6 +65,19 @@ class Settings extends Model
     public static function supportsOnDemandDelivery()
     {
         return false;
+    }
+
+    public static function getShipdayStatusOptions()
+    {
+        return collect([
+            'ORDER_ACCEPTED_AND_STARTED' => 'igniterlabs.shipday::default.label_accepted_status',
+            'STARTED' => 'igniterlabs.shipday::default.label_started_status',
+            'PICKED_UP' => 'igniterlabs.shipday::default.label_picked_up_status',
+            'READY_TO_DELIVER' => 'igniterlabs.shipday::default.label_ready_to_deliver_status',
+            'ALREADY_DELIVERED' => 'igniterlabs.shipday::default.label_delivered_status',
+            'INCOMPLETE' => 'igniterlabs.shipday::default.label_incomplete_status',
+            'FAILED_DELIVERY' => 'igniterlabs.shipday::default.label_failed_delivery_status',
+        ]);
     }
 
     public static function isShipdayDriverStaffGroup($groupId)
@@ -80,36 +95,9 @@ class Settings extends Model
         return self::get('ready_for_pickup_status_id');
     }
 
-    public static function getAcceptedStatusId()
-    {
-        return self::get('accepted_status_id');
-    }
-
-    public static function getPickedUpStatusId()
-    {
-        return self::get('picked_up_status_id');
-    }
-
-    public static function getCompletedStatusId()
-    {
-        return self::get('delivered_status_id');
-    }
-
-    public static function getCanceledStatusId()
-    {
-        return self::get('canceled_status_id');
-    }
-
     public static function getShipdayStatusMap()
     {
-        return collect([
-            'ORDER_ACCEPTED_AND_STARTED' => self::getAcceptedStatusId(),
-            'STARTED' => self::getAcceptedStatusId(),
-            'PICKED_UP' => self::getPickedUpStatusId(),
-            'ALREADY_DELIVERED' => self::getCompletedStatusId(),
-            'ORDER_COMPLETED' => self::getCompletedStatusId(),
-            'FAILED_DELIVERY' => self::getCanceledStatusId(),
-        ])->filter();
+        return collect(self::get('status_map', []))->pluck('order_status', 'shipday_status');
     }
 
     public function getWebhookTokenAttribute($value)

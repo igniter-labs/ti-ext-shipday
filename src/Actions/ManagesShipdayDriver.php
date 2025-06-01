@@ -4,8 +4,8 @@ namespace IgniterLabs\Shipday\Actions;
 
 use Exception;
 use Igniter\Flame\Exception\SystemException;
+use Igniter\System\Actions\ModelAction;
 use IgniterLabs\Shipday\Classes\Client;
-use System\Actions\ModelAction;
 
 class ManagesShipdayDriver extends ModelAction
 {
@@ -59,14 +59,20 @@ class ManagesShipdayDriver extends ModelAction
 
     public function createAsShipdayDriver(array $params = [])
     {
-        if ($this->hasShipdayDriver()) {
-            throw new Exception("{$this->shipdayName()} is already a Shipday driver with ID {$this->shipdayId()}.");
-        }
+        throw_unless(
+            $this->hasShipdayDriver(),
+            new Exception("{$this->shipdayName()} is already a Shipday driver with ID {$this->shipdayId()}."),
+        );
+
+        throw_unless(
+            $telephone = $this->shipdayTelephone(),
+            new SystemException("Staff {$this->shipdayName()} must have a telephone number to create a Shipday driver."),
+        );
 
         resolve(Client::class)->createCarrier([
             'name' => $this->shipdayName(),
             'email' => $this->shipdayEmail(),
-            'phoneNumber' => $this->shipdayTelephone(),
+            'phoneNumber' => $telephone,
         ]);
 
         return $this->asShipdayDriver();

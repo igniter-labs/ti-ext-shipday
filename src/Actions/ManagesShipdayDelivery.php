@@ -2,13 +2,13 @@
 
 namespace IgniterLabs\Shipday\Actions;
 
-use Admin\Models\Locations_model;
-use Admin\Models\Staffs_model;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Exception\SystemException;
+use Igniter\Local\Models\Location;
+use Igniter\System\Actions\ModelAction;
+use Igniter\User\Models\User;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Models\DeliveryLog;
-use System\Actions\ModelAction;
 
 class ManagesShipdayDelivery extends ModelAction
 {
@@ -18,7 +18,7 @@ class ManagesShipdayDelivery extends ModelAction
 
         $this->model->relation['hasMany']['shipday_logs'] = [DeliveryLog::class, 'delete' => true];
 
-        $this->model->bindEvent('model.mailGetData', function () {
+        $this->model->bindEvent('model.mailGetData', function() {
             if (!$this->model->hasShipdayDelivery())
                 return [];
 
@@ -87,7 +87,7 @@ class ManagesShipdayDelivery extends ModelAction
         return $response;
     }
 
-    public function editShipdayDelivery(array $params = [])
+    public function editShipdayDeliveryOrder(array $params = [])
     {
         $this->assertShipdayDelivery();
 
@@ -123,13 +123,13 @@ class ManagesShipdayDelivery extends ModelAction
         resolve(Client::class)->readyForPickup($this->shipdayId());
     }
 
-    public function assignShipdayDeliveryToDriver(Staffs_model $driver)
+    public function assignShipdayDeliveryToDriver(User $driver)
     {
         $this->assertShipdayDelivery();
 
         $driver->assertShipdayDriver();
 
-        return rescue(function () use ($driver) {
+        return rescue(function() use ($driver) {
             return resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipdayId());
         });
     }
@@ -141,11 +141,11 @@ class ManagesShipdayDelivery extends ModelAction
         $orderDateTime = $this->model->order_date_time->tz('UTC');
 
         $params['orderNumber'] = $this->shipdayOrderNumber();
-        $params['orderSource'] = $this->model->location->getName();
+        $params['orderSource'] = 'TastyIgniter';
         $params['expectedDeliveryDate'] = $orderDateTime->toDateString();
         $params['expectedDeliveryTime'] = $orderDateTime->toTimeString();
         $params['expectedPickupTime'] = $orderDateTime->clone()->subMinutes(
-            $this->model->location->getDeliveryWaitTime()
+            $this->model->location->getShipdayDeliveryWaitTime(),
         )->toTimeString();
 
         $params['customerName'] = $this->model->customer_name;
@@ -166,19 +166,19 @@ class ManagesShipdayDelivery extends ModelAction
         $params['deliveryInstruction'] = $this->model->comment;
         $params['paymentMethod'] = $this->model->payment == 'cod' ? 'cash' : 'credit_card';
 
-        $params['deliveryFee'] = $orderTotals->get(Locations_model::DELIVERY)->value ?? 0;
+        $params['deliveryFee'] = $orderTotals->get(Location::DELIVERY)->value ?? 0;
         $params['tips'] = ($tip = $orderTotals->get('tip')) ? $tip->value : 0;
         $params['tax'] = ($tax = $orderTotals->get('tax')) ? $tax->value : 0;
         $params['discountAmount'] = ($coupon = $orderTotals->get('coupon')) ? trim($coupon->value, '-') : 0;
         $params['totalOrderCost'] = $orderTotals->get('total')->value;
 
-        $params['orderItem'] = $this->model->getOrderMenusWithOptions()->map(function ($item) {
+        $params['orderItem'] = $this->model->getOrderMenusWithOptions()->map(function($item) {
             return [
                 'name' => $item->name,
                 'unitPrice' => $item->price,
                 'quantity' => $item->quantity,
                 'detail' => $item->subtotal,
-                'addOns' => $item->menu_options->map(function ($itemOption) {
+                'addOns' => $item->menu_options->map(function($itemOption) {
                     return $itemOption->order_option_name.' ('
                         .currency_format($itemOption->quantity * $itemOption->order_option_price)
                         .') x '.$itemOption->quantity;

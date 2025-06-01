@@ -71,11 +71,11 @@ class Client
     protected function sendRequest($uri, $data = [], $method = 'post'): ?array
     {
         $http = Http::withToken(Settings::getApiKey(), 'Basic');
+        $http->withHeader('x-api-key', Settings::getApiKey());
 
         if ($method !== 'get') {
             $http->asJson();
-        }
-        else {
+        } else {
             $http->acceptJson();
         }
 

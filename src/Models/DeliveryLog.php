@@ -2,7 +2,9 @@
 
 namespace IgniterLabs\Shipday\Models;
 
+use Igniter\Cart\Models\Order;
 use Igniter\Flame\Database\Model;
+use Igniter\User\Models\User;
 
 class DeliveryLog extends Model
 {
@@ -19,9 +21,12 @@ class DeliveryLog extends Model
 
     public $relation = [
         'belongsTo' => [
-            'order' => ['Admin\Models\Orders_model', 'key' => 'order_id'],
+            'order' => [Order::class, 'key' => 'order_id'],
+            'carrier' => [User::class, 'key' => 'carrier_id', 'otherKey' => 'shipday_id'],
         ],
     ];
+
+    protected $appends = ['created_since', 'carrier_name'];
 
     public static function logUpdate($model, array $response = [], array $request = [])
     {
@@ -37,7 +42,7 @@ class DeliveryLog extends Model
 
         $record->save();
 
-        $model::withoutEvents(function () use ($record, $model) {
+        $model::withoutEvents(function() use ($record, $model) {
             $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
             $model->save();
         });
@@ -48,6 +53,11 @@ class DeliveryLog extends Model
     public function getCreatedSinceAttribute($value)
     {
         return $this->created_at ? time_elapsed($this->created_at) : null;
+    }
+
+    public function getCarrierNameAttribute()
+    {
+        return $this->carrier?->full_name;
     }
 
     public function isCancelled()

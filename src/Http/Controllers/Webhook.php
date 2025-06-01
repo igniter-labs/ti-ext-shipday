@@ -1,8 +1,8 @@
 <?php
 
-namespace IgniterLabs\Shipday\Controllers;
+namespace IgniterLabs\Shipday\Http\Controllers;
 
-use Admin\Models\Orders_model;
+use Igniter\Cart\Models\Order;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -37,15 +37,19 @@ class Webhook extends Controller
             'ORDER_ONTHEWAY',
             'ORDER_COMPLETED',
             'ORDER_FAILED',
+            'ORDER_INCOMPLETE',
+            'ORDER_DELETE',
+            'ORDER_INSERTED',
+            'ORDER_PIKEDUP',
+            'ORDER_UNASSIGNED',
+            'ORDER_PIKEDUP_REMOVED',
+            'ORDER_ONTHEWAY_REMOVED',
+            'ORDER_POD_UPLOAD',
         ]);
     }
 
-    /**
-     * @param string $shipdayId
-     * @return \Admin\Models\Orders_model|null
-     */
-    protected function getOrderByShipdayOrderId($orderId)
+    protected function getOrderByShipdayOrderId(string $orderId): ?Order
     {
-        return Orders_model::firstWhere('shipday_id', $orderId);
+        return Order::firstWhere('shipday_id', $orderId);
     }
 }
