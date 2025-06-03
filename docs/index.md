@@ -25,13 +25,28 @@ To get started with the Shipday Delivery extension, follow these steps:
 - **Signup for a Shipday account**: Visit the [Shipday website](https://www.shipday.com/) and create an account if you don't already have one.
 - Navigate to the **Manage > Settings > Shipday Delivery Settings** admin page in your TastyIgniter Admin.
 - The following fields are available on the Shipday Delivery Settings page:
-
   - **Shipday API Key**: Enter your Shipday API key here. You can find this key in your Shipday account under the integrations tab.
   - **Delivery Staff Group:** Choose the staff group for delivery staff members. Each staff member of this group will have a corresponding Shipday account created, allowing them to access the Shipday platform and manage deliveries efficiently.
   - **Delivery Ready for Pickup Status:** Select the order status that indicates an order is ready for pickup. This status will be used to trigger the delivery process in Shipday.
   - **Map Order Status to Shipday Status (and vice versa):** Choose the order statuses that will be mapped to Shipday statuses. This allows you to track the delivery status of orders in both TastyIgniter and Shipday.
 - Click the **Save** button to save your settings.
 Now your TastyIgniter site is integrated with Shipday Delivery, your delivery orders will be automatically sent to Shipday for dispatch and tracking.
+
+### Adding your webhook URL to Shipday
+
+To ensure that Shipday can communicate with your TastyIgniter site, you need to add your webhook URL to your Shipday account. This URL is used by Shipday to send updates about delivery orders back to your TastyIgniter site. 
+
+> This requires a paid Shipday account.
+
+- Navigate to the **Manage > Settings > Shipday Delivery Settings** admin page in your TastyIgniter Admin.
+- Copy the **Webhook URL** provided on the Shipday Delivery Settings page.
+- Log in to your Shipday account and navigate to the **Integrations** section.
+- In the Integrations section, click the **API Credentials** button.
+- In the API Credentials section, find the **Webhook Setup** section and click the **Add API Link** button.
+- In the Add API Link dialog, paste the copied **Webhook URL** into the **URL** field.
+- Set the **Event Types** to the events you want to receive updates for. Typically, you would select all available events to ensure you receive comprehensive updates about your delivery orders.
+- Click the **Save** button to save the webhook configuration.
+- Your webhook URL is now set up, and Shipday will send updates to your TastyIgniter site whenever the selected events occur.
 
 ### Marking an order as ready for pickup
 
