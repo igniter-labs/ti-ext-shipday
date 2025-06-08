@@ -47,7 +47,7 @@ class Extension extends BaseExtension
             'settings' => [
                 'label' => 'lang:igniterlabs.shipday::default.text_settings',
                 'description' => 'lang:igniterlabs.shipday::default.help_settings',
-                'icon' => 'fa fa-gear',
+                'icon' => 'fa fa-truck',
                 'model' => \IgniterLabs\Shipday\Models\Settings::class,
                 'permissions' => ['IgniterLabs.Shipday.ManageSettings'],
             ],
