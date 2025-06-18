@@ -1,11 +1,29 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Models;
 
 use Igniter\Cart\Models\Order;
 use Igniter\Flame\Database\Model;
 use Igniter\User\Models\User;
+use Illuminate\Support\Carbon;
 
+/**
+ * DeliveryLog Model
+ *
+ * @property int $id
+ * @property int $order_id
+ * @property string $shipday_id
+ * @property int $fee
+ * @property string $status
+ * @property int $carrier_id
+ * @property string $tracking_url
+ * @property array $request_data
+ * @property array $response_data
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class DeliveryLog extends Model
 {
     public $table = 'igniterlabs_shipday_logs';
@@ -28,7 +46,7 @@ class DeliveryLog extends Model
 
     protected $appends = ['created_since', 'carrier_name'];
 
-    public static function logUpdate($model, array $response = [], array $request = [])
+    public static function logUpdate($model, array $response = [], array $request = []): static
     {
         $record = new static;
         $record->order_id = $model->shipdayOrderNumber();
@@ -42,15 +60,13 @@ class DeliveryLog extends Model
 
         $record->save();
 
-        $model::withoutEvents(function() use ($record, $model) {
-            $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
-            $model->save();
-        });
+        $model->shipday_id = $record->isCancelled() ? null : $record->shipday_id;
+        $model->saveQuietly();
 
         return $record;
     }
 
-    public function getCreatedSinceAttribute($value)
+    public function getCreatedSinceAttribute($value): ?string
     {
         return $this->created_at ? time_elapsed($this->created_at) : null;
     }
@@ -60,7 +76,7 @@ class DeliveryLog extends Model
         return $this->carrier?->full_name;
     }
 
-    public function isCancelled()
+    public function isCancelled(): bool
     {
         return $this->status === 'FAILED_DELIVERY';
     }

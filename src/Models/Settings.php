@@ -1,10 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Models;
 
 use Igniter\Flame\Database\Model;
+use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
 
+/**
+ * @method static mixed get(string $key, mixed $default = null)
+ * @method static bool set(string|array $key, mixed $value = null)
+ * @mixin SettingsModel
+ */
 class Settings extends Model
 {
     public array $implement = [SettingsModel::class];
@@ -17,11 +25,11 @@ class Settings extends Model
 
     protected static $apiKey;
 
-    public static function isConnected()
+    public static function isConnected(): bool
     {
-        return self::isConfigured()
-            && strlen(self::get('api_key'))
-            && strlen(self::get('webhook_token'));
+        return Igniter::hasDatabase()
+            && strlen((string) self::get('api_key'))
+            && strlen((string) self::get('webhook_token'));
     }
 
     public static function validateWebhookToken(?string $token): bool
@@ -29,40 +37,12 @@ class Settings extends Model
         return $token === self::get('webhook_token');
     }
 
-    public static function createAccessToken()
-    {
-        $header = json_encode([
-            'alg' => 'HS256',
-            'typ' => 'JWT',
-            'dd-ver' => 'DD-JWT-V1',
-        ]);
-
-        $payload = json_encode([
-            'aud' => 'doordash',
-            'iss' => self::getDeveloperId(),
-            'kid' => self::getKeyId(),
-            'exp' => time() + 60,
-            'iat' => time(),
-        ]);
-
-        $base64UrlHeader = self::base64UrlEncode($header);
-        $base64UrlPayload = self::base64UrlEncode($payload);
-
-        $base64UrlSignature = self::base64UrlEncode(hash_hmac('sha256',
-            $base64UrlHeader.".".$base64UrlPayload,
-            self::base64UrlDecode(self::getSigningSecret()),
-            true,
-        ));
-
-        return $base64UrlHeader.".".$base64UrlPayload.".".$base64UrlSignature;
-    }
-
     public static function getApiKey()
     {
         return self::get('api_key');
     }
 
-    public static function supportsOnDemandDelivery()
+    public static function supportsOnDemandDelivery(): bool
     {
         return false;
     }
@@ -80,12 +60,12 @@ class Settings extends Model
         ]);
     }
 
-    public static function isShipdayDriverStaffGroup($groupId)
+    public static function isShipdayDriverStaffGroup($groupId): bool
     {
         return (int)self::get('delivery_staff_group') === $groupId;
     }
 
-    public static function isReadyForPickupOrderStatus($statusId)
+    public static function isReadyForPickupOrderStatus($statusId): bool
     {
         return $statusId == self::getReadyForPickupStatusId();
     }
@@ -100,25 +80,14 @@ class Settings extends Model
         return collect(self::get('status_map', []))->pluck('order_status', 'shipday_status');
     }
 
-    public function getWebhookTokenAttribute($value)
+    public function getWebhookTokenAttribute()
     {
-        if (strlen($value))
+        if ($value = array_get($this->data, 'webhook_token')) {
             return $value;
+        }
 
         self::set('webhook_token', $token = str_random(32));
 
         return $token;
-    }
-
-    protected static function base64UrlEncode(string $data): string
-    {
-        $base64Url = strtr(base64_encode($data), '+/', '-_');
-
-        return rtrim($base64Url, '=');
-    }
-
-    protected static function base64UrlDecode(string $base64Url): string
-    {
-        return base64_decode(strtr($base64Url, '-_', '+/'));
     }
 }

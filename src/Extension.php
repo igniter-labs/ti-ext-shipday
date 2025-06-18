@@ -1,11 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday;
 
 use Igniter\System\Classes\BaseExtension;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Classes\EventRegistry;
+use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
+use Override;
 
 /**
  * Shipday Extension Information File
@@ -17,7 +21,8 @@ class Extension extends BaseExtension
         EventRegistry::class,
     ];
 
-    public function boot()
+    #[Override]
+    public function boot(): void
     {
         resolve(EventRegistry::class)->boot();
 
@@ -28,19 +33,19 @@ class Extension extends BaseExtension
 
     /**
      * Registers any admin permissions used by this extension.
-     *
-     * @return array
      */
+    #[Override]
     public function registerPermissions(): array
     {
         return [
             'IgniterLabs.Shipday.ManageSettings' => [
                 'description' => 'lang:igniterlabs.shipday::default.help_permission',
-                'group' => 'module',
+                'group' => 'igniter.cart::default.text_permission_menu_group',
             ],
         ];
     }
 
+    #[Override]
     public function registerSettings(): array
     {
         return [
@@ -48,7 +53,7 @@ class Extension extends BaseExtension
                 'label' => 'lang:igniterlabs.shipday::default.text_settings',
                 'description' => 'lang:igniterlabs.shipday::default.help_settings',
                 'icon' => 'fa fa-truck',
-                'model' => \IgniterLabs\Shipday\Models\Settings::class,
+                'model' => Settings::class,
                 'permissions' => ['IgniterLabs.Shipday.ManageSettings'],
             ],
         ];

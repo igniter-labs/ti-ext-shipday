@@ -1,0 +1,145 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ColumnDefinition\:\:unqiue\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: database/migrations/2022_07_30_010000_create_delivery_logs_table.php
+
+		-
+			message: '#^Access to an undefined property Igniter\\Cart\\Models\\Order\:\:\$shipday_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Concerns\\LocationAction\|Igniter\\Local\\Models\\Location\:\:getShipdayDeliveryWaitTime\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:asShipdayDelivery\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:hasShipdayDelivery\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\User\\Models\\User\:\:assertShipdayDriver\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\User\\Models\\User\:\:shipdayId\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDelivery.php
+
+		-
+			message: '#^Access to an undefined property Igniter\\User\\Models\\User\:\:\$shipday_id\.$#'
+			identifier: property.notFound
+			count: 3
+			path: src/Actions/ManagesShipdayDriver.php
+
+		-
+			message: '#^Access to an undefined property Igniter\\User\\Models\\User\:\:\$telephone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Actions/ManagesShipdayDriver.php
+
+		-
+			message: '#^Access to an undefined property Igniter\\Local\\Models\\LocationSettings\:\:\$item\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:assignShipdayDeliveryToDriver\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:createOrGetShipdayDelivery\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:hasShipdayDelivery\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:markShipdayDeliveryAsReadyForPickup\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined static method Igniter\\Cart\\Http\\Controllers\\Orders\:\:extendFormFields\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Constructor of class IgniterLabs\\Shipday\\Exceptions\\ClientException has an unused parameter \$previous\.$#'
+			identifier: constructor.unusedParameter
+			count: 1
+			path: src/Exceptions/ClientException.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:logShipdayDelivery\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Http/Controllers/Webhook.php
+
+		-
+			message: '#^Method IgniterLabs\\Shipday\\Http\\Controllers\\Webhook\:\:getOrderByShipdayOrderId\(\) should return Igniter\\Cart\\Models\\Order\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Http/Controllers/Webhook.php
+
+		-
+			message: '#^Access to an undefined property IgniterLabs\\Shipday\\Models\\DeliveryLog\:\:\$carrier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/DeliveryLog.php
+
+		-
+			message: '#^Unsafe usage of new static\(\)\.$#'
+			identifier: new.static
+			count: 1
+			path: src/Models/DeliveryLog.php
+
+		-
+			message: '#^Access to an undefined property IgniterLabs\\Shipday\\Models\\Settings\:\:\$data\.$#'
+			identifier: property.notFound
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Cannot cast Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> to int\.$#'
+			identifier: cast.int
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Static method Igniter\\Flame\\Database\\Builder\:\:get\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string\|null and Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Models/Settings.php

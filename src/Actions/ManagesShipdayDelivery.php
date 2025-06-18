@@ -1,8 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Actions;
 
-use Igniter\Flame\Database\Model;
+use Igniter\Cart\Models\Order;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\Local\Models\Location;
 use Igniter\System\Actions\ModelAction;
@@ -10,22 +12,22 @@ use Igniter\User\Models\User;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Models\DeliveryLog;
 
+/**
+ * @property Order $model
+ */
 class ManagesShipdayDelivery extends ModelAction
 {
-    public function __construct(Model $model)
+    public function __construct(Order $model)
     {
         parent::__construct($model);
 
         $this->model->relation['hasMany']['shipday_logs'] = [DeliveryLog::class, 'delete' => true];
 
-        $this->model->bindEvent('model.mailGetData', function() {
-            if (!$this->model->hasShipdayDelivery())
-                return [];
-
-            return [
-                'shipday_id' => $this->shipdayId(),
-                'shipday_tracking_url' => array_get($this->model->asShipdayDelivery(), 'trackingLink'),
-            ];
+        $this->model->bindEvent('model.mailGetData', function(array &$vars): void {
+            if ($this->model->hasShipdayDelivery()) {
+                $vars['shipday_id'] = $this->shipdayId();
+                $vars['shipday_tracking_url'] = array_get($this->model->asShipdayDelivery(), 'trackingLink');
+            }
         });
     }
 
@@ -41,21 +43,22 @@ class ManagesShipdayDelivery extends ModelAction
 
     public function createOrGetShipdayDelivery()
     {
-        if ($this->hasShipdayDelivery())
+        if ($this->hasShipdayDelivery()) {
             return $this->asShipdayDelivery();
+        }
 
         return $this->createAsShipdayDelivery();
     }
 
-    public function hasShipdayDelivery()
+    public function hasShipdayDelivery(): bool
     {
         return !is_null($this->model->shipday_id);
     }
 
-    public function assertShipdayDelivery()
+    public function assertShipdayDelivery(): void
     {
         if (!$this->hasShipdayDelivery()) {
-            throw new SystemException("Order ID {$this->model->getKey()} is not a Shipday delivery yet. See the createAsShipdayDelivery method.");
+            throw new SystemException(sprintf('Order ID %s is not a Shipday delivery yet. See the createAsShipdayDelivery method.', $this->model->getKey()));
         }
     }
 
@@ -70,11 +73,13 @@ class ManagesShipdayDelivery extends ModelAction
 
     public function createAsShipdayDelivery(array $params = [])
     {
-        if ($this->hasShipdayDelivery())
-            throw new SystemException("Order ID {$this->model->getKey()} is already a Shipday delivery with ID {$this->shipdayId()}.");
+        if ($this->hasShipdayDelivery()) {
+            throw new SystemException(sprintf('Order ID %s is already a Shipday delivery with ID %s.', $this->model->getKey(), $this->shipdayId()));
+        }
 
-        if (!$this->model->isDeliveryType())
-            throw new SystemException("Order ID {$this->model->getKey()} must be a delivery order.");
+        if (!$this->model->isDeliveryType()) {
+            throw new SystemException(sprintf('Order ID %s must be a delivery order.', $this->model->getKey()));
+        }
 
         $params = $this->makeRequestParams($params);
 
@@ -87,7 +92,7 @@ class ManagesShipdayDelivery extends ModelAction
         return $response;
     }
 
-    public function editShipdayDeliveryOrder(array $params = [])
+    public function editShipdayDeliveryOrder(array $params = []): ?array
     {
         $this->assertShipdayDelivery();
 
@@ -97,26 +102,27 @@ class ManagesShipdayDelivery extends ModelAction
         );
     }
 
-    public function updateShipdayDeliveryStatus($shipdayStatus)
+    public function updateShipdayDeliveryStatus($shipdayStatus): DeliveryLog
     {
         $this->assertShipdayDelivery();
 
         $response = resolve(Client::class)->updateOrderStatus($this->shipdayId(), $shipdayStatus);
 
-        if (!$response || !array_get($response, 'success'))
-            throw new SystemException("Unable to update Shipday delivery status to {$shipdayStatus}.");
+        if (!$response || !array_get($response, 'success')) {
+            throw new SystemException(sprintf('Unable to update Shipday delivery status to %s.', $shipdayStatus));
+        }
 
         return $this->logShipdayDelivery($response, ['status' => $shipdayStatus]);
     }
 
-    public function logShipdayDelivery(array $response = [], array $request = [])
+    public function logShipdayDelivery(array $response = [], array $request = []): DeliveryLog
     {
         $response['shipday_order_details'] = $this->asShipdayDelivery();
 
         return DeliveryLog::logUpdate($this->model, $response, $request);
     }
 
-    public function markShipdayDeliveryAsReadyForPickup()
+    public function markShipdayDeliveryAsReadyForPickup(): void
     {
         $this->assertShipdayDelivery();
 
@@ -129,9 +135,7 @@ class ManagesShipdayDelivery extends ModelAction
 
         $driver->assertShipdayDriver();
 
-        return rescue(function() use ($driver) {
-            return resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipdayId());
-        });
+        return rescue(fn() => resolve(Client::class)->assignOrder($this->shipdayId(), $driver->shipdayId()));
     }
 
     protected function makeRequestParams(array $params = [])
@@ -157,11 +161,13 @@ class ManagesShipdayDelivery extends ModelAction
         $params['restaurantAddress'] = format_address($this->model->location->getAddress(), false);
         $params['restaurantPhoneNumber'] = $this->model->location->getTelephone();
 
-        if ($this->model->location->location_lat)
+        if ($this->model->location->location_lat) {
             $params['pickupLatitude'] = $this->model->location->location_lat;
+        }
 
-        if ($this->model->location->location_lng)
+        if ($this->model->location->location_lng) {
             $params['pickupLongitude'] = $this->model->location->location_lng;
+        }
 
         $params['deliveryInstruction'] = $this->model->comment;
         $params['paymentMethod'] = $this->model->payment == 'cod' ? 'cash' : 'credit_card';
@@ -169,26 +175,25 @@ class ManagesShipdayDelivery extends ModelAction
         $params['deliveryFee'] = $orderTotals->get(Location::DELIVERY)->value ?? 0;
         $params['tips'] = ($tip = $orderTotals->get('tip')) ? $tip->value : 0;
         $params['tax'] = ($tax = $orderTotals->get('tax')) ? $tax->value : 0;
-        $params['discountAmount'] = ($coupon = $orderTotals->get('coupon')) ? trim($coupon->value, '-') : 0;
-        $params['totalOrderCost'] = $orderTotals->get('total')->value;
+        $params['discountAmount'] = ($coupon = $orderTotals->get('coupon')) ? trim((string)$coupon->value, '-') : 0;
+        $params['totalOrderCost'] = $orderTotals->get('total')?->value;
 
-        $params['orderItem'] = $this->model->getOrderMenusWithOptions()->map(function($item) {
-            return [
-                'name' => $item->name,
-                'unitPrice' => $item->price,
-                'quantity' => $item->quantity,
-                'detail' => $item->subtotal,
-                'addOns' => $item->menu_options->map(function($itemOption) {
-                    return $itemOption->order_option_name.' ('
-                        .currency_format($itemOption->quantity * $itemOption->order_option_price)
-                        .') x '.$itemOption->quantity;
-                })->all(),
-            ];
-        })->all();
+        $params['orderItem'] = $this->model->getOrderMenusWithOptions()->map(fn($item): array => [
+            'name' => $item->name,
+            'unitPrice' => $item->price,
+            'quantity' => $item->quantity,
+            'detail' => $item->subtotal,
+            'addOns' => $item->menu_options->map(fn($itemOptionValues, $optionName) => $itemOptionValues->map(
+                fn($itemOption): string => $optionName.': '.$itemOption->order_option_name.' ('
+                    .currency_format($itemOption->quantity * $itemOption->order_option_price)
+                    .') x '.$itemOption->quantity,
+            )->all())->values()->collapse()->all(),
+        ])->all();
 
         $eventResult = $this->model->fireSystemEvent('shipday.extendRequestParams', [$params], false);
-        if (is_array($eventResult))
+        if (is_array($eventResult)) {
             $params = array_merge_recursive($params, ...array_filter($eventResult));
+        }
 
         return $params;
     }

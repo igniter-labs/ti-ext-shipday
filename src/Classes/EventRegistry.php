@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Classes;
 
 use Igniter\Admin\Widgets\Form;
@@ -16,7 +18,7 @@ use Illuminate\Support\Facades\Event;
 
 class EventRegistry
 {
-    public function boot()
+    public function boot(): void
     {
         Order::implement(ManagesShipdayDelivery::class);
         User::implement(ManagesShipdayDriver::class);
@@ -34,11 +36,13 @@ class EventRegistry
 
     protected function addShipdayAttemptsTabToOrderDetailsPage(): void
     {
-        Orders::extendFormFields(function(Form $form, $model, $context) {
+        Orders::extendFormFields(function(Form $form, $model, $context): void {
             if (!$model instanceof Order
                 || !$model->isDeliveryType()
                 || !Settings::isConnected()
-            ) return;
+            ) {
+                return;
+            }
 
             $form->addTabFields([
                 'shipday_logs' => [
@@ -94,26 +98,25 @@ class EventRegistry
             }
         });
 
-        Location::extend(function(Location $model) {
-            $model->addDynamicMethod('getShipdayDeliveryWaitTime', function() use ($model) {
-                return $model->getSettings('delivery.shipday_wait_time', 15);
-            });
+        Location::extend(function(Location $model): void {
+            $model->addDynamicMethod('getShipdayDeliveryWaitTime', fn(): mixed => $model->getSettings('delivery.shipday_wait_time', 15));
         });
     }
 
     protected function subscribeToMarkShipdayOrderAsReadyForDelivery(): void
     {
-        Event::listen('admin.statusHistory.beforeAddStatus', function($model, $object, $statusId, $previousStatus) {
+        Event::listen('admin.statusHistory.beforeAddStatus', function($model, $object, $statusId, $previousStatus): void {
             if ($object instanceof Order
                 && $object->isDeliveryType()
                 && $object->hasShipdayDelivery()
                 && Settings::isConnected()
                 && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
-                rescue(function() use ($object) {
+                rescue(function() use ($object): void {
                     $shipdayDelivery = $object->createOrGetShipdayDelivery();
-                    if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP')
+                    if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
                         $object->markShipdayDeliveryAsReadyForPickup();
+                    }
                 });
             }
         });
@@ -121,7 +124,7 @@ class EventRegistry
 
     protected function subscribeToAssignDriverToShipdayOrder(): void
     {
-        Event::listen('admin.assignable.assigned', function($model, $assignableLog) {
+        Event::listen('admin.assignable.assigned', function($model, $assignableLog): void {
             if ($model instanceof Order
                 && $assignableLog->assignee
                 && $model->isDeliveryType()
@@ -137,12 +140,14 @@ class EventRegistry
 
     protected function subscribeToCreateShipdayOrderOnOrderProcessed(): void
     {
-        Event::listen('admin.order.paymentProcessed', function(Order $order) {
-            rescue(function() use ($order) {
+        Event::listen('admin.order.paymentProcessed', function(Order $order): void {
+            rescue(function() use ($order): void {
                 if (!Settings::supportsOnDemandDelivery()
                     && $order->isDeliveryType()
                     && Settings::isConnected()
-                ) $order->createOrGetShipdayDelivery();
+                ) {
+                    $order->createOrGetShipdayDelivery();
+                }
             });
         });
     }

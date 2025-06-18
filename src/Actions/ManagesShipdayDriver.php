@@ -1,14 +1,24 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Actions;
 
-use Exception;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\System\Actions\ModelAction;
+use Igniter\User\Models\User;
 use IgniterLabs\Shipday\Classes\Client;
 
+/**
+ * @property User $model
+ */
 class ManagesShipdayDriver extends ModelAction
 {
+    public function __construct(User $model)
+    {
+        parent::__construct($model);
+    }
+
     public function shipdayId()
     {
         return $this->model->shipday_id;
@@ -31,21 +41,23 @@ class ManagesShipdayDriver extends ModelAction
 
     public function createOrGetShipdayDriver()
     {
-        if ($this->hasShipdayDriver())
+        if ($this->hasShipdayDriver()) {
             return $this->asShipdayDriver();
+        }
 
         return $this->createAsShipdayDriver();
     }
 
-    public function hasShipdayDriver()
+    public function hasShipdayDriver(): bool
     {
-        return !is_null(resolve(Client::class)->getCarrier($this->shipdayEmail()));
+        return !is_null($this->model->shipday_id);
     }
 
-    public function assertShipdayDriver()
+    public function assertShipdayDriver(): void
     {
-        if (!$this->hasShipdayDriver())
-            throw new SystemException("Staff {$this->shipdayName()} is not a Shipday driver yet. See the createAsShipdayDriver method.");
+        if (!$this->hasShipdayDriver()) {
+            throw new SystemException(sprintf('Staff %s is not a Shipday driver yet. See the createAsShipdayDriver method.', $this->shipdayName()));
+        }
     }
 
     public function asShipdayDriver()
@@ -59,31 +71,34 @@ class ManagesShipdayDriver extends ModelAction
 
     public function createAsShipdayDriver(array $params = [])
     {
-        throw_unless(
+        throw_if(
             $this->hasShipdayDriver(),
-            new Exception("{$this->shipdayName()} is already a Shipday driver with ID {$this->shipdayId()}."),
+            new SystemException(sprintf('%s is already a Shipday driver with ID %s.', $this->shipdayName(), $this->shipdayId())),
         );
 
         throw_unless(
             $telephone = $this->shipdayTelephone(),
-            new SystemException("Staff {$this->shipdayName()} must have a telephone number to create a Shipday driver."),
+            new SystemException(sprintf('Staff %s must have a telephone number to create a Shipday driver.', $this->shipdayName())),
         );
 
-        resolve(Client::class)->createCarrier([
-            'name' => $this->shipdayName(),
-            'email' => $this->shipdayEmail(),
-            'phoneNumber' => $telephone,
-        ]);
+        if (is_null(resolve(Client::class)->getCarrier($this->shipdayEmail()))) {
+            resolve(Client::class)->createCarrier([
+                'name' => $this->shipdayName(),
+                'email' => $this->shipdayEmail(),
+                'phoneNumber' => $telephone,
+            ]);
+        }
 
         return $this->asShipdayDriver();
     }
 
-    protected function storeShipdayId($response)
+    protected function storeShipdayId($response): static
     {
         $this->model->shipday_id = array_get($response, 'id');
 
-        if ($this->model->isDirty('shipday_id'))
-            $this->model->save();
+        if ($this->model->isDirty('shipday_id')) {
+            $this->model->saveQuietly();
+        }
 
         return $this;
     }

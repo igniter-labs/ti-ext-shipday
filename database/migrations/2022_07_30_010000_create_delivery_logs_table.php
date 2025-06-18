@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace IgniterLabs\Shipday\Database\Migrations;
 
 use Illuminate\Database\Migrations\Migration;
@@ -8,9 +10,9 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateDeliveryLogsTable extends Migration
 {
-    public function up()
+    public function up(): void
     {
-        Schema::create('igniterlabs_shipday_logs', function(Blueprint $table) {
+        Schema::create('igniterlabs_shipday_logs', function(Blueprint $table): void {
             $table->engine = 'InnoDB';
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_id')->nullable()->index();
@@ -25,25 +27,25 @@ class CreateDeliveryLogsTable extends Migration
         });
 
         if (!Schema::hasColumn('orders', 'shipday_id')) {
-            Schema::table('orders', function(Blueprint $table) {
+            Schema::table('orders', function(Blueprint $table): void {
                 $table->bigInteger('shipday_id')->nullable();
             });
         }
 
         if (!Schema::hasColumn('admin_users', 'telephone')) {
-            Schema::table('admin_users', function(Blueprint $table) {
+            Schema::table('admin_users', function(Blueprint $table): void {
                 $table->string('telephone')->after('email')->nullable();
             });
         }
 
         if (!Schema::hasColumn('admin_users', 'shipday_id')) {
-            Schema::table('admin_users', function(Blueprint $table) {
+            Schema::table('admin_users', function(Blueprint $table): void {
                 $table->bigInteger('shipday_id')->nullable();
             });
         }
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('igniterlabs_shipday_deliveries');
         Schema::dropIfExists('igniterlabs_shipday_logs');
