@@ -36,10 +36,10 @@ class EventRegistry
 
     protected function addShipdayAttemptsTabToOrderDetailsPage(): void
     {
-        Orders::extendFormFields(function(Form $form, $model, $context): void {
-            if (!$model instanceof Order
-                || !$model->isDeliveryType()
-                || !Settings::isConnected()
+        Orders::extendFormFields(function (Form $form, $model, $context): void {
+            if (! $model instanceof Order
+                || ! $model->isDeliveryType()
+                || ! Settings::isConnected()
             ) {
                 return;
             }
@@ -74,7 +74,7 @@ class EventRegistry
 
     protected function extendLocationDeliverySettingsFields(): void
     {
-        Event::listen('admin.form.extendFieldsBefore', function(Form $form): void {
+        Event::listen('admin.form.extendFieldsBefore', function (Form $form): void {
             if ($form->model instanceof LocationSettings && $form->model->item === 'delivery') {
                 $form->fields['shipday_wait_time'] = [
                     'label' => 'lang:igniterlabs.shipday::default.label_delivery_wait_time',
@@ -86,7 +86,7 @@ class EventRegistry
             }
         });
 
-        Event::listen('system.formRequest.extendValidator', function($formRequest, $dataHolder): void {
+        Event::listen('system.formRequest.extendValidator', function ($formRequest, $dataHolder): void {
             if ($formRequest instanceof DeliverySettingsRequest) {
                 $dataHolder->attributes = array_merge($dataHolder->attributes, [
                     'shipday_wait_time' => lang('igniterlabs.shipday::default.label_delivery_wait_time'),
@@ -98,21 +98,21 @@ class EventRegistry
             }
         });
 
-        Location::extend(function(Location $model): void {
-            $model->addDynamicMethod('getShipdayDeliveryWaitTime', fn(): mixed => $model->getSettings('delivery.shipday_wait_time', 15));
+        Location::extend(function (Location $model): void {
+            $model->addDynamicMethod('getShipdayDeliveryWaitTime', fn (): mixed => $model->getSettings('delivery.shipday_wait_time', 15));
         });
     }
 
     protected function subscribeToMarkShipdayOrderAsReadyForDelivery(): void
     {
-        Event::listen('admin.statusHistory.beforeAddStatus', function($model, $object, $statusId, $previousStatus): void {
+        Event::listen('admin.statusHistory.beforeAddStatus', function ($model, $object, $statusId, $previousStatus): void {
             if ($object instanceof Order
                 && $object->isDeliveryType()
                 && $object->hasShipdayDelivery()
                 && Settings::isConnected()
                 && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
-                rescue(function() use ($object): void {
+                rescue(function () use ($object): void {
                     $shipdayDelivery = $object->createOrGetShipdayDelivery();
                     if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
                         $object->markShipdayDeliveryAsReadyForPickup();
@@ -124,7 +124,7 @@ class EventRegistry
 
     protected function subscribeToAssignDriverToShipdayOrder(): void
     {
-        Event::listen('admin.assignable.assigned', function($model, $assignableLog): void {
+        Event::listen('admin.assignable.assigned', function ($model, $assignableLog): void {
             if ($model instanceof Order
                 && $assignableLog->assignee
                 && $model->isDeliveryType()
@@ -140,15 +140,33 @@ class EventRegistry
 
     protected function subscribeToCreateShipdayOrderOnOrderProcessed(): void
     {
-        Event::listen('admin.order.paymentProcessed', function(Order $order): void {
-            rescue(function() use ($order): void {
-                if (!Settings::supportsOnDemandDelivery()
+        Event::listen('admin.order.paymentProcessed', function (Order $order): void {
+            rescue(function () use ($order): void {
+                if (! Settings::supportsOnDemandDelivery()
                     && $order->isDeliveryType()
                     && Settings::isConnected()
                 ) {
                     $order->createOrGetShipdayDelivery();
                 }
             });
+        });
+    }
+
+    protected function subscribeToCalculateOnDemandDeliveryInOrderPage(): void
+    {
+        Event::listen('admin.order.deliverySettings', function ($model, $deliverySettings): void {
+            if (! $model instanceof Order || ! $model->isDeliveryType()) {
+                return;
+            }
+
+            if (Settings::supportsOnDemandDelivery()) {
+                $deliverySettings['shipday_delivery'] = [
+                    'label' => 'lang:igniterlabs.shipday::default.label_shipday_delivery',
+                    'type' => 'checkbox',
+                    'default' => 1,
+                    'comment' => 'lang:igniterlabs.shipday::default.help_shipday_delivery',
+                ];
+            }
         });
     }
 }

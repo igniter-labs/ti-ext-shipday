@@ -11,6 +11,7 @@ use Igniter\System\Actions\SettingsModel;
 /**
  * @method static mixed get(string $key, mixed $default = null)
  * @method static bool set(string|array $key, mixed $value = null)
+ *
  * @mixin SettingsModel
  */
 class Settings extends Model
@@ -44,7 +45,7 @@ class Settings extends Model
 
     public static function supportsOnDemandDelivery(): bool
     {
-        return false;
+        return self::get('delivery_type') === 'on_demand' && self::getApiKey();
     }
 
     public static function getShipdayStatusOptions()
