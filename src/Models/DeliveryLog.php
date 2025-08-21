@@ -66,6 +66,22 @@ class DeliveryLog extends Model
         return $record;
     }
 
+    public static function logOnDemandDelivery($model, array $response = [], array $request = []): static
+    {
+        $record = new static;
+        $record->order_id = $model->shipdayOrderNumber();
+        $record->shipday_id = array_get($response, 'id');
+        $record->fee = array_get($request, 'fee');
+        $record->status = array_get($response, 'status');
+        $record->tracking_url = array_get($response, 'trackingUrl');
+        $record->request_data = $request;
+        $record->response_data = $response;
+
+        $record->save();
+
+        return $record;
+    }
+
     public function getCreatedSinceAttribute($value): ?string
     {
         return $this->created_at ? time_elapsed($this->created_at) : null;
@@ -73,7 +89,7 @@ class DeliveryLog extends Model
 
     public function getCarrierNameAttribute()
     {
-        return $this->carrier?->full_name;
+        return $this->carrier?->full_name ?? array_get($this->response_data, 'thirdPartyName');
     }
 
     public function isCancelled(): bool

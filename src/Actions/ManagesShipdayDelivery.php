@@ -197,4 +197,34 @@ class ManagesShipdayDelivery extends ModelAction
 
         return $params;
     }
+
+    public function assignOrderToOnDemandDeliveryService()
+    {
+        return rescue(function () {
+            $tip = $this->model->getOrderTotals()->keyBy('code')->get('tip');
+            $pickupAddress = format_address($this->model->location->getAddress(), false);
+            $deliveryAddress = $this->model->address->formatted_address;
+            $pickupTime = $this->model->order_date_time->tz('UTC')->toIso8601String();
+            $tip = $tip ? $tip->value : 0;
+
+            $shipdayClient = resolve(Client::class);
+            $availableService = $shipdayClient->getAvailableService(
+                pickupAddress: $pickupAddress,
+                deliveryAddress: $deliveryAddress,
+                pickupTime: $pickupTime
+            );
+            if ($availableService) {
+                $requestParams = [
+                    'name' => $availableService['name'],
+                    'orderId' => $this->shipdayId(),
+                    'tip' => $tip
+                ];
+                $response = $shipdayClient->assignOnDemandDeliveryService($requestParams);
+
+                DeliveryLog::logOnDemandDelivery($this->model, $response, $requestParams);
+            } else {
+                throw new \Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
+            }
+        });
+    }
 }

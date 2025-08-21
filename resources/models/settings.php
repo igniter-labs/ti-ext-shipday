@@ -1,5 +1,7 @@
 <?php
 
+use IgniterLabs\Shipday\Models\Settings;
+
 return [
     'form' => [
         'toolbar' => [
@@ -68,17 +70,17 @@ return [
                 'type' => 'select',
                 'default' => 'in_house',
                 'options' => [
-                    'on_demand' => lang('igniterlabs.shipday::default.text_on_demand'),
-                    'in_house' => lang('igniterlabs.shipday::default.text_in_house'),
+                    'on_demand' => lang('igniterlabs.shipday::default.text_on_demand_delivery'),
+                    'in_house' => lang('igniterlabs.shipday::default.text_in_house_delivery'),
                 ],
             ],
             'on_demand_type_option' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_on_demand_delivery_option',
                 'type' => 'select',
-                'default' => 'manually_select_delivery_service',
+                'default' => 'auto_select_lowest_fee',
                 'options' => [
-                    'manually_select_delivery_service' => lang('igniterlabs.shipday::default.text_on_demand_manually_select'),
-                    'auto_select_lowest_delivery_service' => lang('igniterlabs.shipday::default.text_on_demand_auto_select_lowest_cost'),
+                    'manual_selection' => lang('igniterlabs.shipday::default.text_on_demand_manually_select'),
+                    'auto_select_lowest_fee' => lang('igniterlabs.shipday::default.text_on_demand_auto_select_lowest_fee'),
                 ],
                 'trigger' => [
                     'action' => 'show',
@@ -87,14 +89,14 @@ return [
                 ],
                 'span' => 'left',
             ],
-            'delivery_services' => [
+            'delivery_service' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_on_demand_delivery_services',
                 'type' => 'select',
-                'options' => resolve(\IgniterLabs\Shipday\Classes\Client::class)->getOnDemandServices(),
+                'options' => Settings::getDeliveryServiceOptions(),
                 'trigger' => [
                     'action' => 'show',
-                    'field' => 'delivery_type',
-                    'condition' => 'value[on_demand]',
+                    'field' => 'on_demand_type_option',
+                    'condition' => 'value[manual_selection]',
                 ],
                 'span' => 'right',
             ],

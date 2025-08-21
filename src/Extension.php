@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IgniterLabs\Shipday;
 
 use Igniter\System\Classes\BaseExtension;
+use IgniterLabs\Shipday\CartConditions\OnDemandDelivery;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Classes\EventRegistry;
 use IgniterLabs\Shipday\Models\Settings;
@@ -56,6 +57,17 @@ class Extension extends BaseExtension
                 'model' => Settings::class,
                 'permissions' => ['IgniterLabs.Shipday.ManageSettings'],
             ],
+        ];
+    }
+
+    public function registerCartConditions(): array
+    {
+        return [
+            OnDemandDelivery::class => [
+                'name' => 'shipdayondemanddelivery',
+                'label' => 'lang:igniterlabs.shipday::default.text_on_demand_delivery_fee',
+                'description' => 'lang:igniterlabs.shipday::default.text_on_demand_delivery_fee',
+            ]
         ];
     }
 }

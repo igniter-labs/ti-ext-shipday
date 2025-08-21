@@ -3,10 +3,11 @@
 return [
     'text_settings' => 'Shipday Delivery Settings',
     'text_payment_logs' => 'Shipday Updates',
-    'text_on_demand' => 'On-Demand Delivery',
-    'text_in_house' => 'In-House Delivery',
+    'text_on_demand_delivery' => 'On-Demand Delivery',
+    'text_on_demand_delivery_fee' => 'On-Demand Delivery Fee',
+    'text_in_house_delivery' => 'In-House Delivery',
     'text_on_demand_manually_select' => 'Manually Select 3rd Party Delivery Service',
-    'text_on_demand_auto_select_lowest_cost' => 'Auto Select Delivery Service With Lowest Cost',
+    'text_on_demand_auto_select_lowest_fee' => 'Auto Select Delivery Service With Lowest Fee',
 
     'column_shipday_id' => 'Shipday ID',
     'column_status' => 'Status',
@@ -48,4 +49,8 @@ return [
     'alert_distance_too_long' => 'Your delivery address is too far from the restaurant. Please choose another address.',
     'alert_delivery_address_changed' => 'Your delivery address has been changed. Please review the recalculated delivery fee.',
     'alert_error_fetching_data' => 'Error fetching data: :error',
+    'alert_no_pickup_address' => 'No pickup address is set.',
+    'alert_no_delivery_address' => 'No delivery address is set.',
+    'alert_no_pickup_time' => 'No pickup time is set.',
+    'alert_no_delivery_service_available' => 'No delivery services currently available for the selected address.',
 ];

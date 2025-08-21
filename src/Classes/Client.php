@@ -24,6 +24,11 @@ class Client
         return $this->sendRequest('orders', $params);
     }
 
+    public function assignOnDemandDeliveryService(array $params): ?array
+    {
+        return $this->sendRequest('on-demand/assign', $params);
+    }
+
     public function getOnDemandServices(): array
     {
         if (Settings::getApiKey()) {
@@ -55,71 +60,50 @@ class Client
         return [];
     }
 
-    public function getOnDemandServicesAvailablility(): ?array
+    protected function fetchOnDemandServicesAvailability(array $params): ?array
     {
-//        return $this->sendRequest('on-demand/services/availability', [], 'get');
-        sleep(1); // Simulate network delay
-        return [
-            [
-                "id" => "1",
-                "name" => "DoorDash",
-                "fee" => 11.5,
-                "pickupTime" => "2025-06-25T17:23:52Z",
-                "deliveryTime" => "2025-06-25T18:16:41Z",
-                "pickupDuration" => 11,
-                "deliveryDuration" => 63,
-                "error" => false,
-                "errorCode" => null,
-                "errorMessage" => null,
-                "errorDescription" => null,
-                "isProd" => false,
-                "isInternal" => false,
-                "probableAssignment" => false,
-                "minBillableFee" => null,
-                "regulatoryFee" => 0
-            ],
-            [
-                "id" => null,
-                "name" => "MotoClick",
-                "fee" => null,
-                "pickupTime" => null,
-                "deliveryTime" => null,
-                "pickupDuration" => null,
-                "deliveryDuration" => null,
-                "error" => true,
-                "errorCode" => null,
-                "errorMessage" => "No service available",
-                "errorDescription" => "Outside Delivery Zone",
-                "isProd" => false,
-                "isInternal" => false,
-                "probableAssignment" => false,
-                "minBillableFee" => null,
-                "regulatoryFee" => 0
-            ],
-            [
-                "id" => "dqt_iEU4aT01QJGGHYYZubMqQA",
-                "name" => "Uber",
-                "fee" => 11.99,
-                "pickupTime" => "2025-06-25T17:29:51Z",
-                "deliveryTime" => "2025-06-25T18:40:29Z",
-                "pickupDuration" => 17,
-                "deliveryDuration" => 87,
-                "error" => false,
-                "errorCode" => null,
-                "errorMessage" => null,
-                "errorDescription" => null,
-                "isProd" => false,
-                "isInternal" => false,
-                "probableAssignment" => false,
-                "minBillableFee" => null,
-                "regulatoryFee" => 0
-            ]
-        ];
+        return $this->sendRequest('on-demand/services/availability', $params);
     }
 
-    public function estimateOnDemandDelivery(string $orderId): ?array
+    public function getAvailableService(string $pickupAddress, string $deliveryAddress, string $pickupTime): ?array
     {
-        return $this->sendRequest('on-demand/estimate/' . $orderId, [], 'get');
+        $services = $this->fetchOnDemandServicesAvailability(compact('pickupAddress', 'deliveryAddress', 'pickupTime'));
+
+        $onDemandTypeOption = Settings::get('on_demand_type_option');
+
+        if ($onDemandTypeOption === 'manual_selection' && $deliveryService = Settings::get('delivery_service')) {
+            return $this->getDeliveryServiceByName($services, $deliveryService);
+        } else if ($onDemandTypeOption === 'auto_select_lowest_fee') {
+            return $this->getDeliveryServiceByLowestFee($services);
+        }
+        return null;
+    }
+
+    protected function getDeliveryServiceByName(array $services, string $deliveryService): ?array
+    {
+        foreach ($services as $service) {
+            if ($service['name'] === $deliveryService && (bool)$service["error"] === false) {
+                return $service;
+            }
+        }
+        return null;
+    }
+
+    protected function getDeliveryServiceByLowestFee(array $services): ?array
+    {
+        $lowestFeeService = null;
+
+        foreach ($services as $service) {
+            if ((bool)$service["error"] === true) {
+                continue;
+            }
+
+            if (is_null($lowestFeeService) || $service['fee'] < $lowestFeeService['fee']) {
+                $lowestFeeService = $service;
+            }
+        }
+
+        return $lowestFeeService;
     }
 
     public function editOrder(int|string $uuid, array $params): ?array

@@ -7,6 +7,7 @@ namespace IgniterLabs\Shipday\Models;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
+use IgniterLabs\Shipday\Classes\Client;
 
 /**
  * @method static mixed get(string $key, mixed $default = null)
@@ -90,5 +91,14 @@ class Settings extends Model
         self::set('webhook_token', $token = str_random(32));
 
         return $token;
+    }
+
+    public static function getDeliveryServiceOptions(): array
+    {
+        $services = resolve(Client::class)->getOnDemandServices();
+
+        return collect($services)->mapWithKeys(function ($service) {
+            return [$service => $service];
+        })->toArray();
     }
 }
