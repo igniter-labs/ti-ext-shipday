@@ -121,6 +121,11 @@ class Client
         return $this->sendRequest('orders/'.$uuid, [], 'delete');
     }
 
+    public function cancelOnDemandDelivery(int|string $uuid): ?array
+    {
+        return $this->sendRequest('on-demand/cancel/' . $uuid);
+    }
+
     public function updateOrderStatus(int|string $uuid, $status): ?array
     {
         return $this->sendRequest('orders/'.$uuid.'/status', [

@@ -129,17 +129,26 @@ class EventRegistry
                 && $object->isDeliveryType()
                 && $object->hasShipdayDelivery()
                 && Settings::isConnected()
-                && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
-                rescue(function () use ($object): void {
-                    $shipdayDelivery = $object->createOrGetShipdayDelivery();
-                    if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
-                        $object->markShipdayDeliveryAsReadyForPickup();
-                        if (Settings::supportsOnDemandDelivery()) {
-                            $object->assignOrderToOnDemandDeliveryService();
+                if (Settings::isReadyForPickupOrderStatus($statusId)) {
+                    rescue(function () use ($object): void {
+                        $shipdayDelivery = $object->createOrGetShipdayDelivery();
+                        if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
+                            $object->markShipdayDeliveryAsReadyForPickup();
+                            if (Settings::supportsOnDemandDelivery()) {
+                                $object->assignOrderToOnDemandDeliveryService();
+                            }
                         }
-                    }
-                });
+                    });
+                }
+
+                if (setting('canceled_order_status') == $statusId) {
+                    rescue(function () use ($object): void {
+                        if (Settings::supportsOnDemandDelivery()) {
+                            $object->cancelOnDemandDelivery();
+                        }
+                    });
+                }
             }
         });
     }

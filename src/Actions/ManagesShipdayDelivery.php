@@ -201,6 +201,8 @@ class ManagesShipdayDelivery extends ModelAction
     public function assignOrderToOnDemandDeliveryService()
     {
         return rescue(function () {
+            $this->assertShipdayDelivery();
+
             $tip = $this->model->getOrderTotals()->keyBy('code')->get('tip');
             $pickupAddress = format_address($this->model->location->getAddress(), false);
             $deliveryAddress = $this->model->address->formatted_address;
@@ -226,5 +228,12 @@ class ManagesShipdayDelivery extends ModelAction
                 throw new \Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
             }
         });
+    }
+
+    public function cancelOnDemandDelivery(): void
+    {
+        $this->assertShipdayDelivery();
+
+        resolve(Client::class)->cancelOnDemandDelivery($this->shipdayId());
     }
 }
