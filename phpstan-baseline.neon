@@ -91,12 +91,6 @@ parameters:
 			path: src/Classes/EventRegistry.php
 
 		-
-			message: '#^Constructor of class IgniterLabs\\Shipday\\Exceptions\\ClientException has an unused parameter \$previous\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: src/Exceptions/ClientException.php
-
-		-
 			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:logShipdayDelivery\(\)\.$#'
 			identifier: method.notFound
 			count: 1
