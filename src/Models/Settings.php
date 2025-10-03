@@ -28,8 +28,8 @@ class Settings extends Model
     public static function isConnected(): bool
     {
         return Igniter::hasDatabase()
-            && strlen((string) self::get('api_key'))
-            && strlen((string) self::get('webhook_token'));
+            && strlen((string)self::get('api_key'))
+            && strlen((string)self::get('webhook_token'));
     }
 
     public static function validateWebhookToken(?string $token): bool

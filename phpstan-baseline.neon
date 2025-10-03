@@ -121,7 +121,7 @@ parameters:
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Cannot cast Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> to int\.$#'
+			message: '#^Cannot cast Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: src/Models/Settings.php
@@ -133,7 +133,7 @@ parameters:
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between string\|null and Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> will always evaluate to false\.$#'
+			message: '#^Strict comparison using \=\=\= between string\|null and Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Models/Settings.php
