@@ -26,10 +26,6 @@ Shipday has a direct integration with TastyIgniter. Any delivery order a custome
 
 More documentation can be found on [here](https://github.com/igniter-labs/ti-ext-shipday/blob/master/docs/index.md).
 
-## Changelog
-
-Please see [CHANGELOG](https://github.com/igniter-labs/ti-ext-shipday/blob/master/CHANGELOG.md) for more information on what has changed recently.
-
 ## Reporting issues
 
 If you encounter a bug in this extension, please report it using the [Issue Tracker](https://github.com/tastyigniter/TastyIgniter/issues) on GitHub.
