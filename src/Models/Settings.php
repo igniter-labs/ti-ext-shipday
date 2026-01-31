@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Models;
 
-use Illuminate\Support\Collection;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
+use Illuminate\Support\Collection;
 
 /**
  * @method static mixed get(string $key, mixed $default = null)
