@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Actions;
 
+use Exception;
 use Igniter\Cart\Models\Order;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\Local\Models\Location;
@@ -198,9 +199,9 @@ class ManagesShipdayDelivery extends ModelAction
         return $params;
     }
 
-    public function assignOrderToOnDemandDeliveryService()
+    public function assignOrderToShipdayOnDemandDeliveryService()
     {
-        return rescue(function () {
+        return rescue(function(): void {
             $this->assertShipdayDelivery();
 
             $tip = $this->model->getOrderTotals()->keyBy('code')->get('tip');
@@ -210,27 +211,28 @@ class ManagesShipdayDelivery extends ModelAction
             $tip = $tip ? $tip->value : 0;
 
             $shipdayClient = resolve(Client::class);
-            $availableService = $shipdayClient->getAvailableService(
-                pickupAddress: $pickupAddress,
-                deliveryAddress: $deliveryAddress,
-                pickupTime: $pickupTime
-            );
+            $availableService = $shipdayClient->getAvailableService([
+                'pickup_address' => $pickupAddress,
+                'delivery_address' => $deliveryAddress,
+                'pickup_time' => $pickupTime,
+            ]);
+
             if ($availableService) {
                 $requestParams = [
                     'name' => $availableService['name'],
                     'orderId' => $this->shipdayId(),
-                    'tip' => $tip
+                    'tip' => $tip,
                 ];
                 $response = $shipdayClient->assignOnDemandDeliveryService($requestParams);
 
                 DeliveryLog::logOnDemandDelivery($this->model, $response, $requestParams);
             } else {
-                throw new \Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
+                throw new Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
             }
         });
     }
 
-    public function cancelOnDemandDelivery(): void
+    public function cancelShipdayOnDemandDelivery(): void
     {
         $this->assertShipdayDelivery();
 

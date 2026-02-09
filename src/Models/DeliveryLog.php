@@ -89,7 +89,7 @@ class DeliveryLog extends Model
 
     public function getCarrierNameAttribute()
     {
-        return $this->carrier?->full_name ?? array_get($this->response_data, 'thirdPartyName');
+        return $this->carrier->full_name ?? array_get($this->response_data, 'thirdPartyName');
     }
 
     public function isCancelled(): bool

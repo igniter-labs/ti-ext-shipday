@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Tests;
 
+use IgniterLabs\Shipday\CartConditions\OnDemandDelivery;
 use IgniterLabs\Shipday\Extension;
 use IgniterLabs\Shipday\Models\Settings;
 
@@ -24,4 +25,12 @@ it('registers permissions', function(): void {
 
     expect($permissions)->toHaveKey('IgniterLabs.Shipday.ManageSettings')
         ->and($permissions['IgniterLabs.Shipday.ManageSettings']['group'])->toBe('igniter.cart::default.text_permission_menu_group');
+});
+
+it('registers cart conditions', function(): void {
+    $conditions = $this->extension->registerCartConditions();
+
+    expect($conditions)->toHaveKey(OnDemandDelivery::class)
+        ->and($conditions[OnDemandDelivery::class]['name'])->toBe('shipdayondemanddelivery')
+        ->and($conditions[OnDemandDelivery::class]['label'])->toBe('lang:igniterlabs.shipday::default.text_on_demand_delivery_fee');
 });

@@ -7,8 +7,8 @@ namespace IgniterLabs\Shipday\Models;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
-use Illuminate\Support\Collection;
 use IgniterLabs\Shipday\Classes\Client;
+use Illuminate\Support\Collection;
 
 /**
  * @method static mixed get(string $key, mixed $default = null)
@@ -40,7 +40,7 @@ class Settings extends Model
         return $token === self::get('webhook_token');
     }
 
-    public static function getApiKey()
+    public static function getApiKey(): ?string
     {
         return self::get('api_key');
     }
@@ -48,6 +48,11 @@ class Settings extends Model
     public static function supportsOnDemandDelivery(): bool
     {
         return self::get('delivery_type') === 'on_demand' && self::getApiKey();
+    }
+
+    public static function getDeliveryService(): ?string
+    {
+        return self::get('delivery_service');
     }
 
     public static function getShipdayStatusOptions(): Collection
@@ -96,10 +101,6 @@ class Settings extends Model
 
     public static function getDeliveryServiceOptions(): array
     {
-        $services = resolve(Client::class)->getOnDemandServices();
-
-        return collect($services)->mapWithKeys(function ($service) {
-            return [$service => $service];
-        })->toArray();
+        return resolve(Client::class)->getOnDemandServices();
     }
 }

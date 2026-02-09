@@ -75,3 +75,44 @@ it('checks when delivery status is cancelled', function(): void {
     expect($canceledLog->isCancelled())->toBeTrue()
         ->and($successLog->isCancelled())->toBeFalse();
 });
+
+it('logs on-demand delivery with valid response and request data', function(): void {
+    $order = Order::factory()->create();
+
+    $response = [
+        'id' => 'ondemand123',
+        'status' => 'assigned',
+        'trackingUrl' => 'https://tracking.shipday.com/ondemand123',
+    ];
+    $request = [
+        'name' => 'DoorDash',
+        'orderId' => $order->getKey(),
+        'tip' => 5.55,
+        'fee' => 3.55,
+    ];
+
+    $log = DeliveryLog::logOnDemandDelivery($order, $response, $request);
+
+    expect($log->order_id)->toBe($order->getKey())
+        ->and($log->shipday_id)->toBe('ondemand123')
+        ->and($log->fee)->toBe(3.55)
+        ->and($log->status)->toBe('assigned')
+        ->and($log->tracking_url)->toBe('https://tracking.shipday.com/ondemand123')
+        ->and($log->request_data)->toBe($request)
+        ->and($log->response_data)->toBe($response);
+});
+
+it('logs on-demand delivery with minimal data', function(): void {
+    $order = Order::factory()->create();
+
+    $response = ['id' => 'ondemand123'];
+    $request = [];
+
+    $log = DeliveryLog::logOnDemandDelivery($order, $response, $request);
+
+    expect($log->order_id)->toBe($order->getKey())
+        ->and($log->shipday_id)->toBe('ondemand123')
+        ->and($log->fee)->toBeNull()
+        ->and($log->status)->toBeNull()
+        ->and($log->tracking_url)->toBeNull();
+});

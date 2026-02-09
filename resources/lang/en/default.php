@@ -8,6 +8,7 @@ return [
     'text_in_house_delivery' => 'In-House Delivery',
     'text_on_demand_manually_select' => 'Manually Select 3rd Party Delivery Service',
     'text_on_demand_auto_select_lowest_fee' => 'Auto Select Delivery Service With Lowest Fee',
+    'text_on_demand_auto_select_highest_fee' => 'Auto Select Delivery Service With Highest Fee',
 
     'column_shipday_id' => 'Shipday ID',
     'column_status' => 'Status',
@@ -51,6 +52,5 @@ return [
     'alert_error_fetching_data' => 'Error fetching data: :error',
     'alert_no_pickup_address' => 'No pickup address is set.',
     'alert_no_delivery_address' => 'No delivery address is set.',
-    'alert_no_pickup_time' => 'No pickup time is set.',
     'alert_no_delivery_service_available' => 'No delivery services currently available for the selected address.',
 ];

@@ -67,7 +67,7 @@ class Extension extends BaseExtension
                 'name' => 'shipdayondemanddelivery',
                 'label' => 'lang:igniterlabs.shipday::default.text_on_demand_delivery_fee',
                 'description' => 'lang:igniterlabs.shipday::default.text_on_demand_delivery_fee',
-            ]
+            ],
         ];
     }
 }

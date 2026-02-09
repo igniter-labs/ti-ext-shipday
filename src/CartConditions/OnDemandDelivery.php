@@ -6,9 +6,10 @@ namespace IgniterLabs\Shipday\CartConditions;
 
 use Exception;
 use Igniter\Cart\CartCondition;
+use Igniter\Cart\Facades\Cart;
 use Igniter\Flame\Exception\ApplicationException;
-use Igniter\Local\Models\Location as LocationModel;
 use Igniter\Local\Facades\Location;
+use Igniter\Local\Models\Location as LocationModel;
 use IgniterLabs\Shipday\Classes\Client;
 use IgniterLabs\Shipday\Models\Settings;
 use Override;
@@ -19,7 +20,7 @@ class OnDemandDelivery extends CartCondition
 
     protected float $deliveryCharge = 0;
 
-    protected static array $deliveryService = [];
+    protected static ?array $deliveryService = null;
 
     protected static bool $hasErrors = false;
 
@@ -29,10 +30,10 @@ class OnDemandDelivery extends CartCondition
     }
 
     #[Override]
-    public function beforeApply()
+    public function beforeApply(): bool
     {
         // Do not apply condition when extension settings are not configured
-        if (! Settings::supportsOnDemandDelivery()) {
+        if (!Settings::supportsOnDemandDelivery()) {
             return false;
         }
 
@@ -47,16 +48,10 @@ class OnDemandDelivery extends CartCondition
         }
 
         try {
-            static::$deliveryService = resolve(Client::class)->getAvailableService(
-                $estimateParams['pickup_address'],
-                $estimateParams['delivery_address'],
-                $estimateParams['pickup_time']
-            );
-            if (static::$deliveryService) {
-                $this->deliveryCharge = static::$deliveryService['fee'] ?? 0;
-            } else {
-                throw new ApplicationException(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
-            }
+            static::$deliveryService ??= resolve(Client::class)->getAvailableService($estimateParams);
+
+            $this->deliveryCharge = static::$deliveryService['fee']
+                ?? Location::coveredArea()->deliveryAmount(Cart::subtotal());
         } catch (Exception $exception) {
             if (!self::$hasErrors) {
                 flash()->alert($exception->getMessage())->now();
@@ -72,21 +67,15 @@ class OnDemandDelivery extends CartCondition
 
     protected function prepareEstimateRequest(): array
     {
-        $pickupAddress = format_address(LocationModel::getDefault()->getAddress(), false);
+        $pickupAddress = format_address(Location::current()->getAddress(), false);
         if (empty($pickupAddress)) {
             throw new ApplicationException(lang('igniterlabs.shipday::default.alert_no_pickup_address'));
-        }
-        $deliveryAddress = Location::userPosition()->getFormattedAddress() ?? '';
-
-        $pickupTime = Location::orderDateTime()->toIso8601String();
-        if (empty($pickupTime)) {
-            throw new ApplicationException(lang('igniterlabs.shipday::default.alert_no_pickup_time'));
         }
 
         return [
             'pickup_address' => $pickupAddress,
-            'delivery_address' => $deliveryAddress,
-            'pickup_time' => $pickupTime,
+            'delivery_address' => Location::userPosition()->getFormattedAddress() ?? '',
+            'pickup_time' => Location::orderDateTime()->toIso8601String(),
         ];
     }
 
@@ -94,12 +83,14 @@ class OnDemandDelivery extends CartCondition
     public function getActions(): array
     {
         return [
-            ['value' => "+$this->deliveryCharge"]
+            ['value' => '+'.$this->deliveryCharge],
         ];
     }
+
     public static function clearInternalCache(): void
     {
         self::$hasErrors = false;
+        self::$deliveryService = null;
     }
 
     public function __destruct()
