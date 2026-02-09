@@ -8,7 +8,7 @@ use Exception;
 
 class ClientException extends Exception
 {
-    public function __construct(public $response, protected $code = 0, ?Exception $previous = null)
+    public function __construct(public $response, protected $code = 0)
     {
         $this->message = '[Shipday]: ';
 

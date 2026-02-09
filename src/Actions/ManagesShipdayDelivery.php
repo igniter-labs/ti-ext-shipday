@@ -102,7 +102,7 @@ class ManagesShipdayDelivery extends ModelAction
         );
     }
 
-    public function updateShipdayDeliveryStatus($shipdayStatus): DeliveryLog
+    public function updateShipdayDeliveryStatus(string $shipdayStatus): DeliveryLog
     {
         $this->assertShipdayDelivery();
 

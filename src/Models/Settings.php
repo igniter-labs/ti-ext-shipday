@@ -7,6 +7,7 @@ namespace IgniterLabs\Shipday\Models;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
+use Illuminate\Support\Collection;
 use IgniterLabs\Shipday\Classes\Client;
 
 /**
@@ -49,7 +50,7 @@ class Settings extends Model
         return self::get('delivery_type') === 'on_demand' && self::getApiKey();
     }
 
-    public static function getShipdayStatusOptions()
+    public static function getShipdayStatusOptions(): Collection
     {
         return collect([
             'ORDER_ACCEPTED_AND_STARTED' => 'igniterlabs.shipday::default.label_accepted_status',
