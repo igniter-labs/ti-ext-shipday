@@ -4,7 +4,7 @@ return [
     'text_settings' => 'Shipday Delivery Settings',
     'text_payment_logs' => 'Shipday Updates',
     'text_on_demand_delivery' => 'On-Demand Delivery',
-    'text_on_demand_delivery_fee' => 'On-Demand Delivery Fee',
+    'text_on_demand_delivery_fee' => 'Delivery Fee',
     'text_in_house_delivery' => 'In-House Delivery',
     'text_on_demand_manually_select' => 'Manually Select 3rd Party Delivery Service',
     'text_on_demand_auto_select_lowest_fee' => 'Auto Select Delivery Service With Lowest Fee',

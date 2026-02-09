@@ -29,6 +29,20 @@ class OnDemandDelivery extends CartCondition
         return static::$deliveryService ?: null;
     }
 
+    public static function clearInternalCache(): void
+    {
+        self::$hasErrors = false;
+        self::$deliveryService = null;
+    }
+
+    #[Override]
+    public function getRules(): array
+    {
+        return [
+            $this->deliveryCharge.' >= 0',
+        ];
+    }
+
     #[Override]
     public function beforeApply(): bool
     {
@@ -42,12 +56,12 @@ class OnDemandDelivery extends CartCondition
             return false;
         }
 
-        $estimateParams = $this->prepareEstimateRequest();
-        if ($estimateParams['delivery_address'] === '') {
+        if (!Location::userPosition()->isValid()) {
             return false;
         }
 
         try {
+            $estimateParams = $this->prepareEstimateRequest();
             static::$deliveryService ??= resolve(Client::class)->getAvailableService($estimateParams);
 
             $this->deliveryCharge = static::$deliveryService['fee']
@@ -65,6 +79,20 @@ class OnDemandDelivery extends CartCondition
         return true;
     }
 
+    #[Override]
+    public function getActions(): array
+    {
+        return [
+            ['value' => '+'.$this->deliveryCharge],
+        ];
+    }
+
+    #[Override]
+    public function getValue()
+    {
+        return $this->calculatedValue > 0 ? $this->calculatedValue : lang('igniter::main.text_free');
+    }
+
     protected function prepareEstimateRequest(): array
     {
         $pickupAddress = format_address(Location::current()->getAddress(), false);
@@ -77,20 +105,6 @@ class OnDemandDelivery extends CartCondition
             'delivery_address' => Location::userPosition()->getFormattedAddress() ?? '',
             'pickup_time' => Location::orderDateTime()->toIso8601String(),
         ];
-    }
-
-    #[Override]
-    public function getActions(): array
-    {
-        return [
-            ['value' => '+'.$this->deliveryCharge],
-        ];
-    }
-
-    public static function clearInternalCache(): void
-    {
-        self::$hasErrors = false;
-        self::$deliveryService = null;
     }
 
     public function __destruct()

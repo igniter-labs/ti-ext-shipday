@@ -104,8 +104,8 @@ return [
             'status_map.*.shipday_status' => ['required', 'string'],
             'status_map.*.order_status' => ['required', 'integer'],
             'delivery_type' => ['required', 'in:on_demand,in_house'],
-            'on_demand_type_option' => ['required_if:delivery_type,on_demand', 'in:manual_selection,auto_select_lowest_fee'],
-            'delivery_service' => ['required_if:on_demand_type_option,manual_selection', 'string'],
+            'on_demand_type_option' => ['nullable', 'required_if:delivery_type,on_demand', 'in:manual_selection,auto_select_lowest_fee'],
+            'delivery_service' => ['nullable', 'required_if:on_demand_type_option,manual_selection', 'string'],
         ],
     ],
 ];
