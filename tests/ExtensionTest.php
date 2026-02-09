@@ -31,6 +31,6 @@ it('registers cart conditions', function(): void {
     $conditions = $this->extension->registerCartConditions();
 
     expect($conditions)->toHaveKey(OnDemandDelivery::class)
-        ->and($conditions[OnDemandDelivery::class]['name'])->toBe('shipdayondemanddelivery')
+        ->and($conditions[OnDemandDelivery::class]['name'])->toBe('shipdaydelivery')
         ->and($conditions[OnDemandDelivery::class]['label'])->toBe('lang:igniterlabs.shipday::default.text_on_demand_delivery_fee');
 });

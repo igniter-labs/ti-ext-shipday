@@ -7,7 +7,6 @@ namespace IgniterLabs\Shipday\CartConditions;
 use Exception;
 use Igniter\Cart\CartCondition;
 use Igniter\Cart\Facades\Cart;
-use Igniter\Flame\Exception\ApplicationException;
 use Igniter\Local\Facades\Location;
 use Igniter\Local\Models\Location as LocationModel;
 use IgniterLabs\Shipday\Classes\Client;
@@ -95,20 +94,10 @@ class OnDemandDelivery extends CartCondition
 
     protected function prepareEstimateRequest(): array
     {
-        $pickupAddress = format_address(Location::current()->getAddress(), false);
-        if (empty($pickupAddress)) {
-            throw new ApplicationException(lang('igniterlabs.shipday::default.alert_no_pickup_address'));
-        }
-
         return [
-            'pickup_address' => $pickupAddress,
+            'pickup_address' => format_address(Location::current()->getAddress(), false),
             'delivery_address' => Location::userPosition()->getFormattedAddress() ?? '',
             'pickup_time' => Location::orderDateTime()->toIso8601String(),
         ];
-    }
-
-    public function __destruct()
-    {
-        static::clearInternalCache();
     }
 }

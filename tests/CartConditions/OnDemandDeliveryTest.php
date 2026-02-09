@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace IgniterLabs\Shipday\Tests\CartConditions;
 
 use Igniter\Cart\Facades\Cart;
-use Igniter\Flame\Exception\ApplicationException;
 use Igniter\Local\Classes\CoveredArea;
 use Igniter\Local\Facades\Location;
 use Igniter\Local\Models\Location as LocationModel;
@@ -68,10 +67,19 @@ it('throws exception when pickup address is empty', function(): void {
     $location = new LocationModel;
     Location::shouldReceive('orderType')->andReturn(LocationModel::DELIVERY);
     Location::shouldReceive('current')->andReturn($location);
+    $userLocationMock = mock(\Igniter\Flame\Geolite\Model\Location::class, function($mock): void {
+        $mock->shouldReceive('isValid')->andReturn(true);
+        $mock->shouldReceive('getFormattedAddress')->andReturn('456 Customer St');
+    });
+    Location::shouldReceive('userPosition')->andReturn($userLocationMock);
+    Http::fake([
+        'https://api.shipday.com/on-demand/services/availability' => Http::response([], 500),
+    ]);
 
     $condition = new OnDemandDelivery;
+    $condition->beforeApply();
 
-    expect(fn(): bool => $condition->beforeApply())->toThrow(ApplicationException::class);
+    expect(flash()->messages()->first())->level->toBe('info');
 });
 
 it('applies condition successfully when service is available with fee', function(): void {
@@ -83,9 +91,11 @@ it('applies condition successfully when service is available with fee', function
     Location::shouldReceive('orderType')->andReturn(LocationModel::DELIVERY);
     $location = LocationModel::factory()->make();
     Location::shouldReceive('current')->andReturn($location);
-    Location::shouldReceive('userPosition')->andReturn(\Igniter\Flame\Geolite\Model\Location::createFromArray([
-        'formattedAddress' => '456 Customer St',
-    ]));
+    $userLocationMock = mock(\Igniter\Flame\Geolite\Model\Location::class, function($mock): void {
+        $mock->shouldReceive('isValid')->andReturn(true);
+        $mock->shouldReceive('getFormattedAddress')->andReturn('456 Customer St');
+    });
+    Location::shouldReceive('userPosition')->andReturn($userLocationMock);
     Location::shouldReceive('orderDateTime')->andReturn(now());
     Http::fake([
         'https://api.shipday.com/on-demand/services/availability' => Http::response([
@@ -97,6 +107,7 @@ it('applies condition successfully when service is available with fee', function
     $result = $condition->beforeApply();
 
     expect($result)->toBeTrue()
+        ->and($condition->getRules())->toBe(['3.5 >= 0'])
         ->and($condition->getActions())->toBe([['value' => '+3.5']])
         ->and(OnDemandDelivery::getDeliveryService())->toBeArray()
         ->and(OnDemandDelivery::getDeliveryService()['name'])->toBe('DoorDash');
@@ -111,9 +122,11 @@ it('uses covered area delivery amount when service fee is not available', functi
     Location::shouldReceive('orderType')->andReturn(LocationModel::DELIVERY);
     $location = LocationModel::factory()->make();
     Location::shouldReceive('current')->andReturn($location);
-    Location::shouldReceive('userPosition')->andReturn(\Igniter\Flame\Geolite\Model\Location::createFromArray([
-        'formattedAddress' => '456 Customer St',
-    ]));
+    $userLocationMock = mock(\Igniter\Flame\Geolite\Model\Location::class, function($mock): void {
+        $mock->shouldReceive('isValid')->andReturn(true);
+        $mock->shouldReceive('getFormattedAddress')->andReturn('456 Customer St');
+    });
+    Location::shouldReceive('userPosition')->andReturn($userLocationMock);
     Location::shouldReceive('orderDateTime')->andReturn(now());
     $coveredArea = mock(CoveredArea::class, function($mock): void {
         $mock->shouldReceive('deliveryAmount')->andReturn(5.00);
@@ -130,7 +143,8 @@ it('uses covered area delivery amount when service fee is not available', functi
     $result = $condition->beforeApply();
 
     expect($result)->toBeTrue()
-        ->and($condition->getActions())->toBe([['value' => '+5']]);
+        ->and($condition->getActions())->toBe([['value' => '+5']])
+        ->and($condition->getValue())->toBe('Free');
 });
 
 it('handles exception when getting available service fails', function(): void {
@@ -189,9 +203,11 @@ it('returns correct actions with delivery charge', function(): void {
     Location::shouldReceive('orderType')->andReturn(LocationModel::DELIVERY);
     $location = LocationModel::factory()->make();
     Location::shouldReceive('current')->andReturn($location);
-    Location::shouldReceive('userPosition')->andReturn(\Igniter\Flame\Geolite\Model\Location::createFromArray([
-        'formattedAddress' => '456 Customer St',
-    ]));
+    $userLocationMock = mock(\Igniter\Flame\Geolite\Model\Location::class, function($mock): void {
+        $mock->shouldReceive('isValid')->andReturn(true);
+        $mock->shouldReceive('getFormattedAddress')->andReturn('456 Customer St');
+    });
+    Location::shouldReceive('userPosition')->andReturn($userLocationMock);
     Location::shouldReceive('orderDateTime')->andReturn(now());
     Http::fake([
         'https://api.shipday.com/on-demand/services/availability' => Http::response([
