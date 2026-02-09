@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Classes;
 
+use Exception;
 use Igniter\Admin\Widgets\Form;
 use Igniter\Cart\Http\Controllers\Orders;
 use Igniter\Cart\Http\Requests\DeliverySettingsRequest;
@@ -13,6 +14,7 @@ use Igniter\Local\Models\LocationSettings;
 use Igniter\User\Models\User;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDelivery;
 use IgniterLabs\Shipday\Actions\ManagesShipdayDriver;
+use IgniterLabs\Shipday\CartConditions\OnDemandDelivery;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Support\Facades\Event;
 
@@ -25,6 +27,8 @@ class EventRegistry
 
         $this->addShipdayAttemptsTabToOrderDetailsPage();
 
+        $this->validateOnDemandDeliveryService();
+
         $this->subscribeToCreateShipdayOrderOnOrderProcessed();
 
         $this->subscribeToMarkShipdayOrderAsReadyForDelivery();
@@ -32,6 +36,22 @@ class EventRegistry
         $this->subscribeToAssignDriverToShipdayOrder();
 
         $this->extendLocationDeliverySettingsFields();
+    }
+
+    protected function validateOnDemandDeliveryService(): void
+    {
+        Event::listen('igniter.checkout.afterSaveOrder', function(Order $order): void {
+            if (!Settings::supportsOnDemandDelivery()
+                || !$order->isDeliveryType()
+                || !Settings::isConnected()
+            ) {
+                return;
+            }
+
+            if (in_array(OnDemandDelivery::getDeliveryService(), [null, []], true)) {
+                throw new Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
+            }
+        });
     }
 
     protected function addShipdayAttemptsTabToOrderDetailsPage(): void
@@ -110,14 +130,26 @@ class EventRegistry
                 && $object->isDeliveryType()
                 && $object->hasShipdayDelivery()
                 && Settings::isConnected()
-                && Settings::isReadyForPickupOrderStatus($statusId)
             ) {
-                rescue(function() use ($object): void {
-                    $shipdayDelivery = $object->createOrGetShipdayDelivery();
-                    if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
-                        $object->markShipdayDeliveryAsReadyForPickup();
-                    }
-                });
+                if (Settings::isReadyForPickupOrderStatus($statusId)) {
+                    rescue(function() use ($object): void {
+                        $shipdayDelivery = $object->createOrGetShipdayDelivery();
+                        if (array_get($shipdayDelivery, 'orderStatusAdmin') !== 'READY_FOR_PICKUP') {
+                            $object->markShipdayDeliveryAsReadyForPickup();
+                            if (Settings::supportsOnDemandDelivery()) {
+                                $object->assignOrderToShipdayOnDemandDeliveryService();
+                            }
+                        }
+                    });
+                }
+
+                if (setting('canceled_order_status') == $statusId) {
+                    rescue(function() use ($object): void {
+                        if (Settings::supportsOnDemandDelivery()) {
+                            $object->cancelShipdayOnDemandDelivery();
+                        }
+                    });
+                }
             }
         });
     }
@@ -142,8 +174,7 @@ class EventRegistry
     {
         Event::listen('admin.order.paymentProcessed', function(Order $order): void {
             rescue(function() use ($order): void {
-                if (!Settings::supportsOnDemandDelivery()
-                    && $order->isDeliveryType()
+                if ($order->isDeliveryType()
                     && Settings::isConnected()
                 ) {
                     $order->createOrGetShipdayDelivery();

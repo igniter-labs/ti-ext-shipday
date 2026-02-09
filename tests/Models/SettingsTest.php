@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace IgniterLabs\Shipday\Tests\Models;
 
 use IgniterLabs\Shipday\Models\Settings;
+use Illuminate\Support\Facades\Http;
 
 beforeEach(function(): void {
     Settings::flushEventListeners();
@@ -41,4 +42,47 @@ it('returns correct status options for Shipday', function(): void {
         'INCOMPLETE',
         'FAILED_DELIVERY',
     );
+});
+
+it('returns true when on-demand delivery is supported', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => 'test-key',
+    ]);
+
+    expect(Settings::supportsOnDemandDelivery())->toBeTrue();
+});
+
+it('returns false when delivery type is not on-demand', function(): void {
+    Settings::set([
+        'delivery_type' => 'in_house',
+        'api_key' => 'test-key',
+    ]);
+
+    expect(Settings::supportsOnDemandDelivery())->toBeFalse();
+});
+
+it('returns false when api key is not set', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => null,
+    ]);
+
+    expect(Settings::supportsOnDemandDelivery())->toBeFalse();
+});
+
+it('gets delivery service options', function(): void {
+    Settings::set(['api_key' => 'test-key']);
+    Http::fake([
+        'https://api.shipday.com/on-demand/services' => Http::response([
+            ['name' => 'DoorDash'],
+            ['name' => 'Postmates'],
+        ]),
+    ]);
+
+    $options = Settings::getDeliveryServiceOptions();
+
+    expect($options)->toBeArray()
+        ->and($options)->toHaveKey('DoorDash')
+        ->and($options['DoorDash'])->toBe('DoorDash');
 });
