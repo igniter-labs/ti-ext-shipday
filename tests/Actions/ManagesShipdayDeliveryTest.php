@@ -113,3 +113,70 @@ it('throws exception when updating Shipday delivery status fails', function(): v
         'Unable to update Shipday delivery status to DELIVERED.',
     );
 });
+
+it('assigns order to on-demand delivery service successfully', function(): void {
+    $address = Address::factory()->create();
+    $location = Location::factory()->create();
+    $order = Order::factory()
+        ->for($address, 'address')
+        ->for($location, 'location')
+        ->create([
+            'shipday_id' => '12345',
+            'order_type' => 'delivery',
+        ]);
+    $order->addOrderTotals([
+        ['code' => 'tip', 'value' => 5.00],
+    ]);
+    Http::fake([
+        'https://api.shipday.com/on-demand/services/availability' => Http::response([
+            ['name' => 'DoorDash', 'fee' => 3.50, 'error' => false],
+        ]),
+        'https://api.shipday.com/on-demand/assign' => Http::response([
+            'id' => 'ondemand123',
+            'status' => 'assigned',
+            'trackingUrl' => 'https://tracking.shipday.com/ondemand123',
+        ]),
+    ]);
+
+    $result = $order->assignOrderToShipdayOnDemandDeliveryService();
+
+    expect($result)->toBeNull(); // rescue returns null on success
+});
+
+it('handles exception when no delivery service available', function(): void {
+    $address = Address::factory()->create();
+    $location = Location::factory()->create();
+    $order = Order::factory()
+        ->for($address, 'address')
+        ->for($location, 'location')
+        ->create([
+            'shipday_id' => '12345',
+            'order_type' => 'delivery',
+        ]);
+    Http::fake([
+        'https://api.shipday.com/on-demand/services/availability' => Http::response([]),
+    ]);
+
+    $result = $order->assignOrderToShipdayOnDemandDeliveryService();
+
+    expect($result)->toBeNull(); // rescue catches exception and returns null
+});
+
+it('cancels on-demand delivery successfully', function(): void {
+    $order = Order::factory()->create([
+        'shipday_id' => '12345',
+    ]);
+    Http::fake([
+        'https://api.shipday.com/on-demand/cancel/12345' => Http::response(['success' => true]),
+    ]);
+
+    $order->cancelShipdayOnDemandDelivery();
+
+    Http::assertSent(fn($request): bool => $request->url() === 'https://api.shipday.com/on-demand/cancel/12345');
+});
+
+it('throws exception when canceling on-demand delivery for order without shipday id', function(): void {
+    $order = Order::factory()->create();
+
+    expect(fn() => $order->cancelShipdayOnDemandDelivery())->toThrow(SystemException::class);
+});

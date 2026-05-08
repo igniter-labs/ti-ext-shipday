@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Tests\Classes;
 
+use Exception;
 use Igniter\Admin\Models\Status;
 use Igniter\Admin\Widgets\Form;
 use Igniter\Cart\Http\Controllers\Orders;
@@ -15,6 +16,7 @@ use Igniter\User\Models\Address;
 use Igniter\User\Models\AssignableLog;
 use Igniter\User\Models\User;
 use Igniter\User\Models\UserGroup;
+use IgniterLabs\Shipday\CartConditions\OnDemandDelivery;
 use IgniterLabs\Shipday\Models\Settings;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Http;
@@ -154,4 +156,110 @@ it('creates shipday order on payment processed when conditions are met', functio
     Event::dispatch('admin.order.paymentProcessed', [$order]);
 
     expect($order->shipday_id)->toBe('abc1234');
+});
+
+it('validates on-demand delivery service on checkout when service is not available', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => 'test-key',
+    ]);
+    $order = Order::factory()->create([
+        'order_type' => 'delivery',
+    ]);
+    OnDemandDelivery::clearInternalCache();
+
+    expect(fn() => Event::dispatch('igniter.checkout.afterSaveOrder', [$order]))
+        ->toThrow(Exception::class);
+});
+
+it('does not validate when on-demand delivery is not supported', function(): void {
+    Settings::set([
+        'delivery_type' => 'in_house',
+        'api_key' => 'test-key',
+    ]);
+    $order = Order::factory()->create([
+        'order_type' => 'delivery',
+    ]);
+
+    Event::dispatch('igniter.checkout.afterSaveOrder', [$order]);
+
+    expect(true)->toBeTrue(); // Should not throw exception
+});
+
+it('assigns on-demand delivery service when order is marked ready for pickup', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => 'test-key',
+        'ready_for_pickup_status_id' => 5,
+        'on_demand_type_option' => 'auto_select_lowest_fee',
+    ]);
+    $address = Address::factory()->create();
+    $location = Location::factory()->create();
+    $order = Order::factory()
+        ->for($address, 'address')
+        ->for($location, 'location')
+        ->create([
+            'order_type' => 'delivery',
+            'shipday_id' => 1234,
+        ]);
+    $order->addOrderTotals([
+        ['code' => 'tip', 'value' => 5.00],
+    ]);
+    Http::fake([
+        'https://api.shipday.com/orders/'.$order->getKey() => Http::response(['orderStatusAdmin' => 'PENDING']),
+        'https://api.shipday.com/orders/*/meta' => Http::response(['success' => true]),
+        'https://api.shipday.com/on-demand/services/availability' => Http::response([
+            ['name' => 'DoorDash', 'fee' => 3.50, 'error' => false],
+        ]),
+        'https://api.shipday.com/on-demand/assign' => Http::response([
+            'id' => 'ondemand123',
+            'status' => 'assigned',
+        ]),
+    ]);
+
+    $order->updateOrderStatus(5);
+
+    Http::assertSent(fn($request): bool => str_contains((string) $request->url(), 'on-demand/assign'));
+});
+
+it('cancels on-demand delivery when order is canceled', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => 'test-key',
+    ]);
+    $status = Status::factory()->create();
+    setting()->set(['canceled_order_status' => $status->getKey()]);
+    $order = Order::factory()->create([
+        'order_type' => 'delivery',
+        'shipday_id' => 1234,
+    ]);
+    Http::fake([
+        'https://api.shipday.com/orders/'.$order->getKey() => Http::response(['orderStatusAdmin' => 'PENDING']),
+        'https://api.shipday.com/on-demand/cancel/1234' => Http::response(['success' => true]),
+    ]);
+
+    $order->updateOrderStatus($status->getKey());
+
+    Http::assertSent(fn($request): bool => str_contains((string) $request->url(), 'on-demand/cancel'));
+});
+
+it('does not cancel on-demand delivery when order is not canceled status', function(): void {
+    Settings::set([
+        'delivery_type' => 'on_demand',
+        'api_key' => 'test-key',
+    ]);
+    $status = Status::factory()->create();
+    $otherStatus = Status::factory()->create();
+    setting()->set(['canceled_order_status' => $status->getKey()]);
+    $order = Order::factory()->create([
+        'order_type' => 'delivery',
+        'shipday_id' => 1234,
+    ]);
+    Http::fake([
+        'https://api.shipday.com/orders/'.$order->getKey() => Http::response(['orderStatusAdmin' => 'PENDING']),
+    ]);
+
+    $order->updateOrderStatus($otherStatus->getKey()); // Different status
+
+    Http::assertNotSent(fn($request): bool => str_contains((string) $request->url(), 'on-demand/cancel'));
 });

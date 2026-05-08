@@ -26,7 +26,12 @@ To get started with the Shipday Delivery extension, follow these steps:
 - Navigate to the **Manage > Settings > Shipday Delivery Settings** admin page in your TastyIgniter Admin.
 - The following fields are available on the Shipday Delivery Settings page:
   - **Shipday API Key**: Enter your Shipday API key here. You can find this key in your Shipday account under the integrations tab.
-  - **Delivery Staff Group:** Choose the staff group for delivery staff members. Each staff member of this group will have a corresponding Shipday account created, allowing them to access the Shipday platform and manage deliveries efficiently.
+  - **Delivery Type:** Choose between "In-House Delivery" (using your own delivery staff) or "On-Demand Delivery" (using third-party delivery services like DoorDash, Postmates, or Uber).
+  - **On-Demand Delivery Option:** (Only visible when Delivery Type is set to "On-Demand Delivery") Choose how to select third-party delivery services:
+    - **Manually Select 3rd Party Delivery Service:** You can manually choose which service to use for each order.
+    - **Auto Select Delivery Service With Lowest Fee:** The system will automatically select the service with the lowest delivery fee.
+  - **3rd party On-Demand Delivery Services:** (Only visible when manually selecting services) Choose which third-party delivery service to use by default (e.g., DoorDash, Postmates, Uber).
+  - **Delivery Staff Group:** Choose the staff group for delivery staff members. Each staff member of this group will have a corresponding Shipday account created, allowing them to access the Shipday platform and manage deliveries efficiently. (Only used for In-House Delivery)
   - **Delivery Ready for Pickup Status:** Select the order status that indicates an order is ready for pickup. This status will be used to trigger the delivery process in Shipday.
   - **Map Order Status to Shipday Status (and vice versa):** Choose the order statuses that will be mapped to Shipday statuses. This allows you to track the delivery status of orders in both TastyIgniter and Shipday.
 - Click the **Save** button to save your settings.
@@ -69,6 +74,35 @@ To assign a delivery staff member to an order, follow these steps:
 - Next, select the delivery staff member you want to assign to the order from the **Assign To User** dropdown menu. The dropdown will only show staff members from the selected group.
 - Click the **Save** button to assign the selected delivery staff member to the order.
 - The Shipday order will now be updated with the assigned delivery staff member, and they will be able to access the order in their Shipday account. If no associated Shipday Carrier account is found, a new one will be created automatically.
+
+## On-Demand Delivery
+
+The Shipday extension supports on-demand delivery through third-party services like DoorDash, Postmates, and Uber. This feature allows restaurants to offer delivery services without maintaining their own delivery fleet.
+
+### How On-Demand Delivery Works
+
+When **Delivery Type** is set to **On-Demand Delivery**:
+
+1. **During Checkout**: When customers place a delivery order, the system automatically checks which third-party delivery services are available for the delivery address and calculates the delivery fee in real-time.
+
+2. **Delivery Fee Calculation**: The delivery fee is calculated based on:
+   - Pickup address (restaurant location)
+   - Delivery address (customer address)
+   - Pickup time (order scheduled time)
+   - Available services and their current rates
+
+3. **Service Selection**: Depending on your configuration:
+   - **Manual Selection**: You can choose a specific service (e.g., DoorDash) to use for all orders.
+   - **Auto Select Lowest Fee**: The system automatically selects the service with the lowest delivery fee available at checkout time.
+   - **Auto Select Highest Fee**: The system automatically selects the service with the highest delivery fee available at checkout time.
+   - If no services are available for the customer's address, the configured location delivery area fee will be used as a fallback.
+
+4. **Order Processing**: When an order is marked as **Ready for Pickup**:
+   - The order is automatically assigned to the selected third-party delivery service
+   - The delivery service dispatches a driver to pick up and deliver the order
+   - Customers can track their delivery in real-time through Shipday
+
+5. **Order Cancellation**: If an order is canceled after being assigned to a delivery service, the on-demand delivery assignment is automatically canceled.
 
 ## Usage
 
@@ -131,4 +165,67 @@ To create a Shipday carrier account for a delivery staff member, you can use the
 use Igniter\User\Models\User;
 $user = User::find($userId); // Replace $userId with the actual user ID of the delivery staff member
 $user->createAsShipdayDriver();
+```
+
+### Assigning an Order to On-Demand Delivery Service
+
+When using on-demand delivery, you can manually assign an order to a third-party delivery service. This is typically done automatically when an order is marked as ready for pickup, but you can also do it programmatically:
+
+```php
+use Igniter\Cart\Models\Order;
+
+$order = Order::find($orderId); // Replace $orderId with the actual order ID
+$order->assignOrderToShipdayOnDemandDeliveryService();
+```
+
+This method will:
+- Check for available delivery services based on the order's pickup and delivery addresses
+- Select the appropriate service based on your configuration (manual selection or lowest fee)
+- Assign the order to the selected service
+- Log the assignment for tracking purposes
+
+### Canceling an On-Demand Delivery
+
+If you need to cancel an on-demand delivery assignment, you can use the `cancelShipdayOnDemandDelivery` method:
+
+```php
+use Igniter\Cart\Models\Order;
+
+$order = Order::find($orderId); // Replace $orderId with the actual order ID
+$order->cancelShipdayOnDemandDelivery();
+```
+
+This will cancel the delivery assignment with the third-party service. Note that cancellation policies may vary by service provider.
+
+### Checking On-Demand Delivery Service Availability
+
+To check which delivery services are available for a specific address and time, you can use the `getAvailableService` method from the Shipday Client:
+
+```php
+use IgniterLabs\Shipday\Classes\Client;
+
+$client = resolve(Client::class);
+$availableService = $client->getAvailableService([
+    'pickup_address' => '123 Restaurant St, City, State',
+    'delivery_address' => '456 Customer St, City, State',
+    'pickup_time' => '2024-01-15T18:00:00Z',
+]);
+
+if ($availableService) {
+    $serviceName = $availableService['name']; // e.g., 'DoorDash'
+    $deliveryFee = $availableService['fee']; // Delivery fee amount
+} else {
+    // No services available
+}
+```
+
+### Getting Available On-Demand Services
+
+To retrieve a list of all available on-demand delivery services configured in your Shipday account:
+
+```php
+use IgniterLabs\Shipday\Classes\Client;
+
+$client = resolve(Client::class);
+$services = $client->getOnDemandServices(); // Returns array of service names, e.g., ['DoorDash', 'Postmates', 'Uber']
 ```

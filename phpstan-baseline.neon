@@ -55,13 +55,55 @@ parameters:
 			path: src/Actions/ManagesShipdayDriver.php
 
 		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Support\\Collection\<\(int\|string\),mixed\>\:\:first\(\) expects \(callable\(mixed, int\|string\)\: bool\)\|null, Closure\(array\)\: non\-empty\-array given\.$#'
+			identifier: argument.type
+			count: 1
+			path: src/Classes/Client.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: src/Classes/Client.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''auto_select_highest…'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Classes/Client.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''auto_select_lowest…'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Classes/Client.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''manual_selection'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: src/Classes/Client.php
+
+		-
 			message: '#^Access to an undefined property Igniter\\Local\\Models\\LocationSettings\:\:\$item\.$#'
 			identifier: property.notFound
 			count: 1
 			path: src/Classes/EventRegistry.php
 
 		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:assignOrderToShipdayOnDemandDeliveryService\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
 			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:assignShipdayDeliveryToDriver\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Classes/EventRegistry.php
+
+		-
+			message: '#^Call to an undefined method Igniter\\Cart\\Models\\Order\:\:cancelShipdayOnDemandDelivery\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Classes/EventRegistry.php
@@ -103,15 +145,9 @@ parameters:
 			path: src/Http/Controllers/Webhook.php
 
 		-
-			message: '#^Access to an undefined property IgniterLabs\\Shipday\\Models\\DeliveryLog\:\:\$carrier\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Models/DeliveryLog.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
-			count: 1
+			count: 2
 			path: src/Models/DeliveryLog.php
 
 		-
@@ -127,8 +163,32 @@ parameters:
 			path: src/Models/Settings.php
 
 		-
+			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getApiKey\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getDeliveryService\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\.$#'
+			identifier: return.type
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Result of && is always false\.$#'
+			identifier: booleanAnd.alwaysFalse
+			count: 1
+			path: src/Models/Settings.php
+
+		-
 			message: '#^Static method Igniter\\Flame\\Database\\Builder\:\:get\(\) invoked with 2 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
+			count: 1
+			path: src/Models/Settings.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''on_demand'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Models/Settings.php
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Actions;
 
+use Exception;
 use Igniter\Cart\Models\Order;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\Local\Models\Location;
@@ -196,5 +197,45 @@ class ManagesShipdayDelivery extends ModelAction
         }
 
         return $params;
+    }
+
+    public function assignOrderToShipdayOnDemandDeliveryService()
+    {
+        return rescue(function(): void {
+            $this->assertShipdayDelivery();
+
+            $tip = $this->model->getOrderTotals()->keyBy('code')->get('tip');
+            $pickupAddress = format_address($this->model->location->getAddress(), false);
+            $deliveryAddress = $this->model->address->formatted_address;
+            $pickupTime = $this->model->order_date_time->tz('UTC')->toIso8601String();
+            $tip = $tip ? $tip->value : 0;
+
+            $shipdayClient = resolve(Client::class);
+            $availableService = $shipdayClient->getAvailableService([
+                'pickup_address' => $pickupAddress,
+                'delivery_address' => $deliveryAddress,
+                'pickup_time' => $pickupTime,
+            ]);
+
+            if ($availableService) {
+                $requestParams = [
+                    'name' => $availableService['name'],
+                    'orderId' => $this->shipdayId(),
+                    'tip' => $tip,
+                ];
+                $response = $shipdayClient->assignOnDemandDeliveryService($requestParams);
+
+                DeliveryLog::logOnDemandDelivery($this->model, $response, $requestParams);
+            } else {
+                throw new Exception(lang('igniterlabs.shipday::default.alert_no_delivery_service_available'));
+            }
+        });
+    }
+
+    public function cancelShipdayOnDemandDelivery(): void
+    {
+        $this->assertShipdayDelivery();
+
+        resolve(Client::class)->cancelOnDemandDelivery($this->shipdayId());
     }
 }

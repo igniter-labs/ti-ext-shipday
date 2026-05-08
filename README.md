@@ -16,23 +16,24 @@ Shipday has a direct integration with TastyIgniter. Any delivery order a custome
 ## Features
 
 - Delivery orders can instantly sent to Shipday's dispatch system for simple delivery management
+- Automatically integrate with third-party delivery services (DoorDash, Postmates, Uber) for delivery fulfillment
+- Automatically calculate delivery fees during checkout based on customer address and available third-party delivery services
+- Choose to manually select a delivery service or automatically use the service with the lowest/highest fee
 - Using Google Maps, you can quickly define route clusters on the map to optimize delivery stops and follow delivery drivers in real time
 - Restaurant owners can manage their deliveries efficiently from Shipday Dashboard. This includes assigning drivers to orders and tracking deliveries
 - Customers can track their orders in real-time and receive notifications about the estimated delivery time and the status of their order
 - Restaurant owners can manage their drivers, assign them to orders, and track their performance
 - Integrates well with TastyIgniter's checkout process, allowing customers to see their delivery costs
+- Automatic assignment of orders to on-demand delivery services when marked as ready for pickup
+- Automatic cancellation of on-demand deliveries when orders are canceled
 
 ## Documentation
 
 More documentation can be found on [here](https://github.com/igniter-labs/ti-ext-shipday/blob/master/docs/index.md).
 
-## Changelog
-
-Please see [CHANGELOG](https://github.com/igniter-labs/ti-ext-shipday/blob/master/CHANGELOG.md) for more information on what has changed recently.
-
 ## Reporting issues
 
-If you encounter a bug in this extension, please report it using the [Issue Tracker](https://github.com/igniter-labs/ti-ext-shipday/issues) on GitHub.
+If you encounter a bug in this extension, please report it using the [Issue Tracker](https://github.com/tastyigniter/TastyIgniter/issues) on GitHub.
 
 ## Contributing
 

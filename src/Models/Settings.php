@@ -7,10 +7,13 @@ namespace IgniterLabs\Shipday\Models;
 use Igniter\Flame\Database\Model;
 use Igniter\Flame\Support\Facades\Igniter;
 use Igniter\System\Actions\SettingsModel;
+use IgniterLabs\Shipday\Classes\Client;
+use Illuminate\Support\Collection;
 
 /**
  * @method static mixed get(string $key, mixed $default = null)
  * @method static bool set(string|array $key, mixed $value = null)
+ *
  * @mixin SettingsModel
  */
 class Settings extends Model
@@ -28,8 +31,8 @@ class Settings extends Model
     public static function isConnected(): bool
     {
         return Igniter::hasDatabase()
-            && strlen((string)self::get('api_key'))
-            && strlen((string)self::get('webhook_token'));
+            && strlen((string) self::get('api_key'))
+            && strlen((string) self::get('webhook_token'));
     }
 
     public static function validateWebhookToken(?string $token): bool
@@ -37,17 +40,22 @@ class Settings extends Model
         return $token === self::get('webhook_token');
     }
 
-    public static function getApiKey()
+    public static function getApiKey(): ?string
     {
         return self::get('api_key');
     }
 
     public static function supportsOnDemandDelivery(): bool
     {
-        return false;
+        return self::get('delivery_type') === 'on_demand' && self::getApiKey();
     }
 
-    public static function getShipdayStatusOptions()
+    public static function getDeliveryService(): ?string
+    {
+        return self::get('delivery_service');
+    }
+
+    public static function getShipdayStatusOptions(): Collection
     {
         return collect([
             'ORDER_ACCEPTED_AND_STARTED' => 'igniterlabs.shipday::default.label_accepted_status',
@@ -89,5 +97,10 @@ class Settings extends Model
         self::set('webhook_token', $token = str_random(32));
 
         return $token;
+    }
+
+    public static function getDeliveryServiceOptions(): array
+    {
+        return resolve(Client::class)->getOnDemandServices();
     }
 }
