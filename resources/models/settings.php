@@ -1,5 +1,7 @@
 <?php
 
+use Igniter\Admin\Models\Status;
+use Igniter\User\Models\UserGroup;
 use IgniterLabs\Shipday\Models\Settings;
 
 return [
@@ -68,13 +70,13 @@ return [
             'delivery_staff_group' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_delivery_staff_group',
                 'type' => 'select',
-                'options' => [\Igniter\User\Models\UserGroup::class, 'getDropdownOptions'],
+                'options' => [UserGroup::class, 'getDropdownOptions'],
                 'comment' => 'lang:igniterlabs.shipday::default.help_delivery_staff_group',
             ],
             'ready_for_pickup_status_id' => [
                 'label' => 'lang:igniterlabs.shipday::default.label_ready_for_pickup_status',
                 'type' => 'select',
-                'options' => [\Igniter\Admin\Models\Status::class, 'getDropdownOptionsForOrder'],
+                'options' => [Status::class, 'getDropdownOptionsForOrder'],
                 'comment' => 'lang:igniterlabs.shipday::default.help_ready_for_pickup_status',
             ],
             'status_map' => [
@@ -90,7 +92,7 @@ return [
                         'order_status' => [
                             'label' => 'lang:igniterlabs.shipday::default.label_order_status',
                             'type' => 'select',
-                            'options' => [\Igniter\Admin\Models\Status::class, 'getDropdownOptionsForOrder'],
+                            'options' => [Status::class, 'getDropdownOptionsForOrder'],
                         ],
                     ],
                 ],

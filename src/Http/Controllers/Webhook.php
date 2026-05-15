@@ -14,7 +14,6 @@ class Webhook extends Controller
     public function __invoke(Request $request, $token)
     {
         if ($this->shouldHandleEvent($token, $eventName = $request->input('event'))) {
-            /** @var Order|null $order */
             $order = $this->getOrderByShipdayOrderId($request->input('order.id'));
             if ($order && $order->isDeliveryType()) {
                 $log = $order->logShipdayDelivery($request->input());
