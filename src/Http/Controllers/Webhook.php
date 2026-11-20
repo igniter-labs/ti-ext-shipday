@@ -15,7 +15,7 @@ class Webhook extends Controller
     {
         if ($this->shouldHandleEvent($token, $eventName = $request->input('event'))) {
             $order = $this->getOrderByShipdayOrderId($request->input('order.id'));
-            if ($order && $order->isDeliveryType()) {
+            if ($order instanceof Order && $order->isDeliveryType()) {
                 $log = $order->logShipdayDelivery($request->input());
 
                 $eventName = $eventName !== 'ORDER_COMPLETED' ? $log->status : $eventName;

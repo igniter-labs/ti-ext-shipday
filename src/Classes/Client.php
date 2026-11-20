@@ -55,13 +55,15 @@ class Client
     {
         $services = $this->sendRequest('on-demand/services/availability', $params);
 
-        $onDemandTypeOption = Settings::get('on_demand_type_option');
-
+        $onDemandTypeOption = (string)Settings::get('on_demand_type_option');
         if ($onDemandTypeOption === 'manual_selection' && $deliveryService = Settings::getDeliveryService()) {
             return $this->getDeliveryServiceByName($services, $deliveryService);
-        } elseif ($onDemandTypeOption === 'auto_select_lowest_fee') {
+        }
+        if ($onDemandTypeOption === 'auto_select_lowest_fee') {
             return $this->getDeliveryServiceByLowestFee($services);
-        } elseif ($onDemandTypeOption === 'auto_select_highest_fee') {
+        }
+
+        if ($onDemandTypeOption === 'auto_select_highest_fee') {
             return $this->getDeliveryServiceByHighestFee($services);
         }
 
