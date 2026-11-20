@@ -59,6 +59,7 @@ class Client
         if ($onDemandTypeOption === 'manual_selection' && $deliveryService = Settings::getDeliveryService()) {
             return $this->getDeliveryServiceByName($services, $deliveryService);
         }
+
         if ($onDemandTypeOption === 'auto_select_lowest_fee') {
             return $this->getDeliveryServiceByLowestFee($services);
         }
