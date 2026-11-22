@@ -25,6 +25,12 @@ it('returns false when webhook token is invalid', function(): void {
     expect(Settings::validateWebhookToken('invalid_token'))->toBeFalse();
 });
 
+it('returns false when no webhook token is given', function(?string $token): void {
+    Settings::set(['webhook_token' => 'valid_token']);
+
+    expect(Settings::validateWebhookToken($token))->toBeFalse();
+})->with([[null], ['']]);
+
 it('creates a webhook token when none exists', function(): void {
     Settings::clearInternalCache();
     expect(Settings::get('webhook_token'))->not->toBeNull();

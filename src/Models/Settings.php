@@ -37,7 +37,9 @@ class Settings extends Model
 
     public static function validateWebhookToken(?string $token): bool
     {
-        return $token === (string)self::get('webhook_token');
+        $webhookToken = (string)self::get('webhook_token');
+
+        return $webhookToken !== '' && is_string($token) && hash_equals($webhookToken, $token);
     }
 
     public static function getApiKey(): ?string
