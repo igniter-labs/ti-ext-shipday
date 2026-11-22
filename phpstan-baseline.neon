@@ -61,30 +61,6 @@ parameters:
 			path: src/Classes/Client.php
 
 		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 1
-			path: src/Classes/Client.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''auto_select_highest…'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Classes/Client.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''auto_select_lowest…'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Classes/Client.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''manual_selection'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Classes/Client.php
-
-		-
 			message: '#^Access to an undefined property Igniter\\Local\\Models\\LocationSettings\:\:\$item\.$#'
 			identifier: property.notFound
 			count: 1
@@ -139,12 +115,6 @@ parameters:
 			path: src/Http/Controllers/Webhook.php
 
 		-
-			message: '#^Method IgniterLabs\\Shipday\\Http\\Controllers\\Webhook\:\:getOrderByShipdayOrderId\(\) should return Igniter\\Cart\\Models\\Order\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Http/Controllers/Webhook.php
-
-		-
 			message: '#^Unsafe usage of new static\(\)\.$#'
 			identifier: new.static
 			count: 2
@@ -157,19 +127,19 @@ parameters:
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Cannot cast Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> to int\.$#'
+			message: '#^Cannot cast Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> to int\.$#'
 			identifier: cast.int
 			count: 1
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getApiKey\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\.$#'
+			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getApiKey\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getDeliveryService\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\>\.$#'
+			message: '#^Method IgniterLabs\\Shipday\\Models\\Settings\:\:getDeliveryService\(\) should return string\|null but returns Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\>\.$#'
 			identifier: return.type
 			count: 1
 			path: src/Models/Settings.php
@@ -181,19 +151,13 @@ parameters:
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Static method Igniter\\Flame\\Database\\Builder\:\:get\(\) invoked with 2 parameters, 0\-1 required\.$#'
+			message: '#^Static method Igniter\\Flame\\Database\\Builder\<IgniterLabs\\Shipday\\Models\\Settings\>\:\:get\(\) invoked with 2 parameters, 0\-1 required\.$#'
 			identifier: arguments.count
 			count: 1
 			path: src/Models/Settings.php
 
 		-
-			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> and ''on_demand'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Models/Settings.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between string\|null and Illuminate\\Database\\Eloquent\\Collection\<int, Illuminate\\Database\\Eloquent\\Model\> will always evaluate to false\.$#'
+			message: '#^Strict comparison using \=\=\= between Illuminate\\Database\\Eloquent\\Collection\<int, IgniterLabs\\Shipday\\Models\\Settings\> and ''on_demand'' will always evaluate to false\.$#'
 			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Models/Settings.php
