@@ -33,7 +33,7 @@ To get started with the Shipday Delivery extension, follow these steps:
   - **3rd party On-Demand Delivery Services:** (Only visible when manually selecting services) Choose which third-party delivery service to use by default (e.g., DoorDash, Postmates, Uber).
   - **Delivery Staff Group:** Choose the staff group for delivery staff members. Each staff member of this group will have a corresponding Shipday account created, allowing them to access the Shipday platform and manage deliveries efficiently. (Only used for In-House Delivery)
   - **Delivery Ready for Pickup Status:** Select the order status that indicates an order is ready for pickup. This status will be used to trigger the delivery process in Shipday.
-  - **Map Order Status to Shipday Status (and vice versa):** Choose the order statuses that will be mapped to Shipday statuses. This allows you to track the delivery status of orders in both TastyIgniter and Shipday.
+  - **Map Shipday Status to Order Status:** Choose which order status to apply when Shipday reports a delivery status (Not Assigned, Not Accepted, Not Started Yet, Started, Picked Up, Ready to Deliver, Delivered, Incomplete, Failed Delivery). This mapping only applies to updates sent from Shipday to TastyIgniter through the webhook.
 - Click the **Save** button to save your settings.
 Now your TastyIgniter site is integrated with Shipday Delivery, your delivery orders will be automatically sent to Shipday for dispatch and tracking.
 
@@ -45,6 +45,7 @@ To ensure that Shipday can communicate with your TastyIgniter site, you need to 
 
 - Navigate to the **Manage > Settings > Shipday Delivery Settings** admin page in your TastyIgniter Admin.
 - Copy the **Webhook URL** provided on the Shipday Delivery Settings page.
+  - The webhook URL already contains a secret token as its last path segment. The token is generated automatically (32 characters) the first time the settings page is opened, so there is no token field to fill in. Paste the full URL exactly as shown. Shipday's own optional **Token** field can be left empty.
 - Log in to your Shipday account and navigate to the **Integrations** section.
 - In the Integrations section, click the **API Credentials** button.
 - In the API Credentials section, find the **Webhook Setup** section and click the **Add API Link** button.

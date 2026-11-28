@@ -181,9 +181,9 @@ class ManagesShipdayDelivery extends ModelAction
 
         $params['orderItem'] = $this->model->getOrderMenusWithOptions()->map(fn($item): array => [
             'name' => $item->name,
-            'unitPrice' => $item->price,
+            'unitPrice' => $item->quantity > 0 ? $item->subtotal / $item->quantity : $item->price,
             'quantity' => $item->quantity,
-            'detail' => $item->subtotal,
+            'detail' => (string)$item->comment,
             'addOns' => $item->menu_options->map(fn($itemOptionValues, $optionName) => $itemOptionValues->map(
                 fn($itemOption): string => $optionName.': '.$itemOption->order_option_name.' ('
                     .currency_format($itemOption->quantity * $itemOption->order_option_price)

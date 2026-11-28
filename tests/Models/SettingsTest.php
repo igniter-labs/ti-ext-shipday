@@ -39,15 +39,31 @@ it('creates a webhook token when none exists', function(): void {
 it('returns correct status options for Shipday', function(): void {
     $statusOptions = Settings::getShipdayStatusOptions();
 
-    expect($statusOptions->keys())->toContain(
-        'ORDER_ACCEPTED_AND_STARTED',
+    expect($statusOptions->keys()->all())->toBe([
+        'NOT_ASSIGNED',
+        'NOT_ACCEPTED',
+        'NOT_STARTED_YET',
         'STARTED',
         'PICKED_UP',
         'READY_TO_DELIVER',
         'ALREADY_DELIVERED',
         'INCOMPLETE',
         'FAILED_DELIVERY',
-    );
+    ]);
+});
+
+it('maps legacy saved status map keys to Shipday order statuses', function(): void {
+    Settings::set('status_map', [
+        ['shipday_status' => 'ORDER_COMPLETED', 'order_status' => 5],
+        ['shipday_status' => 'ORDER_ACCEPTED_AND_STARTED', 'order_status' => 3],
+        ['shipday_status' => 'PICKED_UP', 'order_status' => 4],
+    ]);
+
+    expect(Settings::getShipdayStatusMap()->all())->toBe([
+        'ALREADY_DELIVERED' => 5,
+        'STARTED' => 3,
+        'PICKED_UP' => 4,
+    ]);
 });
 
 it('returns true when on-demand delivery is supported', function(): void {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace IgniterLabs\Shipday\Tests\Actions;
 
+use Igniter\Cart\Models\Menu;
 use Igniter\Cart\Models\Order;
 use Igniter\Flame\Exception\SystemException;
 use Igniter\Local\Models\Location;
@@ -179,4 +180,42 @@ it('throws exception when canceling on-demand delivery for order without shipday
     $order = Order::factory()->create();
 
     expect(fn() => $order->cancelShipdayOnDemandDelivery())->toThrow(SystemException::class);
+});
+
+it('sends item comment as detail and unit price including options when creating delivery', function(): void {
+    $address = Address::factory()->create();
+    $location = Location::factory()->create();
+    $order = Order::factory()
+        ->for($address, 'address')
+        ->for($location, 'location')
+        ->create([
+            'order_type' => 'delivery',
+        ]);
+    $order->menus()->create([
+        'menu_id' => Menu::factory()->create()->getKey(),
+        'name' => 'Burger',
+        'quantity' => 2,
+        'price' => 10,
+        'subtotal' => 25,
+        'comment' => 'No onions',
+    ]);
+    Http::fake([
+        'https://api.shipday.com/orders' => Http::response(['orderId' => 'abc1234']),
+        'https://api.shipday.com/orders/'.$order->getKey() => Http::response([['orderId' => 'abc1234']]),
+    ]);
+
+    $order->createAsShipdayDelivery();
+
+    Http::assertSent(function($request): bool {
+        if ($request->url() !== 'https://api.shipday.com/orders' || $request->method() !== 'POST') {
+            return false;
+        }
+
+        $item = $request->data()['orderItem'][0] ?? [];
+
+        return $item['name'] === 'Burger'
+            && $item['quantity'] === 2
+            && (float)$item['unitPrice'] === 12.5
+            && $item['detail'] === 'No onions';
+    });
 });

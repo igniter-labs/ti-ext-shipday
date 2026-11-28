@@ -13,13 +13,13 @@ class Webhook extends Controller
 {
     public function __invoke(Request $request, $token)
     {
-        if ($this->shouldHandleEvent($token, $eventName = $request->input('event'))) {
-            $order = $this->getOrderByShipdayOrderId($request->input('order.id'));
+        $shipdayOrderId = $request->input('order.id');
+        if (is_scalar($shipdayOrderId) && $shipdayOrderId !== '' && $this->shouldHandleEvent($token, $request->input('event'))) {
+            $order = $this->getOrderByShipdayOrderId((string)$shipdayOrderId);
             if ($order instanceof Order && $order->isDeliveryType()) {
                 $log = $order->logShipdayDelivery($request->input());
 
-                $eventName = $eventName !== 'ORDER_COMPLETED' ? $log->status : $eventName;
-                $statusId = Settings::getShipdayStatusMap()->get($eventName);
+                $statusId = Settings::getShipdayStatusMap()->get($log->status);
                 if ($statusId && $order->status_id != $statusId) {
                     $order->updateOrderStatus($statusId, ['notify' => false]);
                 }

@@ -60,7 +60,9 @@ class Settings extends Model
     public static function getShipdayStatusOptions(): Collection
     {
         return collect([
-            'ORDER_ACCEPTED_AND_STARTED' => 'igniterlabs.shipday::default.label_accepted_status',
+            'NOT_ASSIGNED' => 'igniterlabs.shipday::default.label_not_assigned_status',
+            'NOT_ACCEPTED' => 'igniterlabs.shipday::default.label_not_accepted_status',
+            'NOT_STARTED_YET' => 'igniterlabs.shipday::default.label_not_started_yet_status',
             'STARTED' => 'igniterlabs.shipday::default.label_started_status',
             'PICKED_UP' => 'igniterlabs.shipday::default.label_picked_up_status',
             'READY_TO_DELIVER' => 'igniterlabs.shipday::default.label_ready_to_deliver_status',
@@ -87,7 +89,22 @@ class Settings extends Model
 
     public static function getShipdayStatusMap()
     {
-        return collect(self::get('status_map', []))->pluck('order_status', 'shipday_status');
+        // Map legacy saved keys (webhook event names) to Shipday order statuses
+        $legacyStatuses = [
+            'ORDER_COMPLETED' => 'ALREADY_DELIVERED',
+            'ORDER_ACCEPTED_AND_STARTED' => 'STARTED',
+        ];
+
+        return collect(self::get('status_map', []))
+            ->map(function($item) use ($legacyStatuses) {
+                $shipdayStatus = array_get($item, 'shipday_status');
+                if (is_string($shipdayStatus) && array_key_exists($shipdayStatus, $legacyStatuses)) {
+                    $item['shipday_status'] = $legacyStatuses[$shipdayStatus];
+                }
+
+                return $item;
+            })
+            ->pluck('order_status', 'shipday_status');
     }
 
     public function getWebhookTokenAttribute()

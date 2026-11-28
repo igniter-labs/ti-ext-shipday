@@ -16,7 +16,7 @@ class CreateDeliveryLogsTable extends Migration
             $table->engine = 'InnoDB';
             $table->bigIncrements('id');
             $table->unsignedBigInteger('order_id')->nullable()->index();
-            $table->string('shipday_id')->unqiue();
+            $table->string('shipday_id')->index();
             $table->bigInteger('fee')->nullable();
             $table->string('status')->nullable();
             $table->bigInteger('carrier_id')->nullable();

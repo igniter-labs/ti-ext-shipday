@@ -1,12 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\ColumnDefinition\:\:unqiue\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: database/migrations/2022_07_30_010000_create_delivery_logs_table.php
-
-		-
 			message: '#^Access to an undefined property Igniter\\Cart\\Models\\Order\:\:\$shipday_id\.$#'
 			identifier: property.notFound
 			count: 3
