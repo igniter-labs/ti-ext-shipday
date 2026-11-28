@@ -96,7 +96,7 @@ class Settings extends Model
         ];
 
         return collect(self::get('status_map', []))
-            ->map(function($item) use ($legacyStatuses) {
+            ->map(function(array $item) use ($legacyStatuses): array {
                 $shipdayStatus = array_get($item, 'shipday_status');
                 if (is_string($shipdayStatus) && array_key_exists($shipdayStatus, $legacyStatuses)) {
                     $item['shipday_status'] = $legacyStatuses[$shipdayStatus];
